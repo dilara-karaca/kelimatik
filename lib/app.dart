@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
-import 'presentation/screens/main_shell_screen.dart';
+import 'presentation/widgets/auth_gate.dart';
 
 class KelimatikApp extends StatelessWidget {
   const KelimatikApp({super.key});
@@ -12,7 +12,7 @@ class KelimatikApp extends StatelessWidget {
       title: 'Kelimatik',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      home: const MainShellScreen(),
+      home: const AuthGate(),
     );
   }
 }

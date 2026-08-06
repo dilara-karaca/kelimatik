@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Loads `.env` and initializes the Supabase client.
 ///
-/// Call once from [main] before [runApp]. Auth / DB features are not wired yet.
+/// Call once from [main] before [runApp].
 abstract final class SupabaseBootstrap {
   static Future<void> initialize() async {
     await dotenv.load(fileName: '.env');

@@ -102,7 +102,7 @@
   {
     "id": 21,
     "correct": "ara sıra",
-    "wrong": "arasira"
+    "wrong": "arasıra"
   },
   {
     "id": 22,
@@ -731,1207 +731,1817 @@
   },
   {
     "id": 147,
-    "correct": "kokoreç",
-    "wrong": "kokariç"
-  },
-  {
-    "id": 148,
     "correct": "program",
     "wrong": "proğram"
   },
   {
-    "id": 149,
+    "id": 148,
     "correct": "grup",
     "wrong": "gurup"
   },
   {
-    "id": 150,
+    "id": 149,
     "correct": "film",
     "wrong": "filim"
   },
   {
-    "id": 151,
+    "id": 150,
     "correct": "espri",
     "wrong": "espiri"
   },
   {
-    "id": 152,
+    "id": 151,
     "correct": "röportaj",
     "wrong": "röpörtaj"
   },
   {
-    "id": 153,
+    "id": 152,
     "correct": "grip",
     "wrong": "grib"
   },
   {
-    "id": 154,
+    "id": 153,
     "correct": "tampon",
     "wrong": "tanpon"
   },
   {
-    "id": 155,
+    "id": 154,
     "correct": "bisküvi",
     "wrong": "büsküvi"
   },
   {
-    "id": 156,
+    "id": 155,
     "correct": "lavabo",
     "wrong": "lavobo"
   },
   {
-    "id": 157,
+    "id": 156,
     "correct": "süveter",
     "wrong": "süeter"
   },
   {
-    "id": 158,
+    "id": 157,
     "correct": "ilköğretim",
     "wrong": "ilk öğretim"
   },
   {
-    "id": 159,
+    "id": 158,
     "correct": "ortaöğretim",
     "wrong": "orta öğretim"
   },
   {
-    "id": 160,
+    "id": 159,
     "correct": "başhekim",
     "wrong": "baş hekim"
   },
   {
-    "id": 161,
+    "id": 160,
     "correct": "başhemşire",
     "wrong": "baş hemşire"
   },
   {
-    "id": 162,
+    "id": 161,
     "correct": "huzurevi",
     "wrong": "huzur evi"
   },
   {
-    "id": 163,
+    "id": 162,
     "correct": "basımevi",
     "wrong": "basım evi"
   },
   {
-    "id": 164,
+    "id": 163,
     "correct": "ayçiçeği",
     "wrong": "ay çiçeği"
   },
   {
-    "id": 165,
+    "id": 164,
     "correct": "hanımeli",
     "wrong": "hanım eli"
   },
   {
-    "id": 166,
+    "id": 165,
     "correct": "kahverengi",
     "wrong": "kahve rengi"
   },
   {
-    "id": 167,
+    "id": 166,
     "correct": "vurdumduymaz",
     "wrong": "vurdum duymaz"
   },
   {
-    "id": 168,
+    "id": 167,
     "correct": "gitgide",
     "wrong": "git gide"
   },
   {
-    "id": 169,
+    "id": 168,
     "correct": "açgözlü",
     "wrong": "aç gözlü"
   },
   {
-    "id": 170,
+    "id": 169,
     "correct": "safkan",
     "wrong": "saf kan"
   },
   {
-    "id": 171,
+    "id": 170,
     "correct": "her biri",
     "wrong": "herbiri"
   },
   {
-    "id": 172,
+    "id": 171,
     "correct": "kaç kez",
     "wrong": "kaçkez"
   },
   {
-    "id": 173,
+    "id": 172,
     "correct": "ilk kez",
     "wrong": "ilkkez"
   },
   {
-    "id": 174,
+    "id": 173,
     "correct": "bir kez",
     "wrong": "birkez"
   },
   {
-    "id": 175,
+    "id": 174,
     "correct": "öte yandan",
     "wrong": "öteyandan"
   },
   {
-    "id": 176,
+    "id": 175,
     "correct": "bir arada",
     "wrong": "birarada"
   },
   {
-    "id": 177,
+    "id": 176,
     "correct": "bir araya",
     "wrong": "biraraya"
   },
   {
-    "id": 178,
+    "id": 177,
     "correct": "göz göze",
     "wrong": "gözgöze"
   },
   {
-    "id": 179,
+    "id": 178,
     "correct": "el ele",
     "wrong": "elele"
   },
   {
-    "id": 180,
+    "id": 179,
     "correct": "baş başa",
     "wrong": "başbaşa"
   },
   {
-    "id": 181,
+    "id": 180,
     "correct": "karşı karşıya",
     "wrong": "karşıkarşıya"
   },
   {
-    "id": 182,
+    "id": 181,
     "correct": "yüz yüze",
     "wrong": "yüzyüze"
   },
   {
-    "id": 183,
-    "correct": "ard arda",
+    "id": 182,
+    "correct": "art arda",
     "wrong": "ardarda"
   },
   {
-    "id": 184,
+    "id": 183,
     "correct": "peş peşe",
     "wrong": "peşpeşe"
   },
   {
-    "id": 185,
+    "id": 184,
     "correct": "teker teker",
     "wrong": "tekerteker"
   },
   {
-    "id": 186,
+    "id": 185,
     "correct": "adım adım",
     "wrong": "adımadım"
   },
   {
-    "id": 187,
+    "id": 186,
     "correct": "gelişigüzel",
     "wrong": "gelişi güzel"
   },
   {
-    "id": 188,
+    "id": 187,
     "correct": "ne yazık ki",
     "wrong": "neyazıkki"
   },
   {
-    "id": 189,
+    "id": 188,
     "correct": "babaanne",
     "wrong": "baba anne"
   },
   {
-    "id": 190,
+    "id": 189,
     "correct": "hanımefendi",
     "wrong": "hanım efendi"
   },
   {
-    "id": 191,
+    "id": 190,
     "correct": "beyefendi",
     "wrong": "bey efendi"
   },
   {
-    "id": 192,
+    "id": 191,
     "correct": "gökdelen",
     "wrong": "gök delen"
   },
   {
-    "id": 193,
+    "id": 192,
     "correct": "gökbilim",
     "wrong": "gök bilim"
   },
   {
-    "id": 194,
+    "id": 193,
     "correct": "yeraltı",
     "wrong": "yer altı"
   },
   {
-    "id": 195,
+    "id": 194,
     "correct": "yerüstü",
     "wrong": "yer üstü"
   },
   {
-    "id": 196,
+    "id": 195,
     "correct": "bilirkişi",
     "wrong": "bilir kişi"
   },
   {
-    "id": 197,
+    "id": 196,
     "correct": "güngörmüş",
     "wrong": "gün görmüş"
   },
   {
-    "id": 198,
+    "id": 197,
     "correct": "adamakıllı",
     "wrong": "adam akıllı"
   },
   {
-    "id": 199,
+    "id": 198,
     "correct": "ipucu",
     "wrong": "ip ucu"
   },
   {
-    "id": 200,
+    "id": 199,
     "correct": "baştacı",
     "wrong": "baş tacı"
   },
   {
-    "id": 201,
+    "id": 200,
     "correct": "yurt dışı",
     "wrong": "yurtdışı"
   },
   {
-    "id": 202,
+    "id": 201,
     "correct": "yurt içi",
     "wrong": "yurtiçi"
   },
   {
-    "id": 203,
+    "id": 202,
     "correct": "öteberi",
     "wrong": "öte beri"
   },
   {
-    "id": 204,
+    "id": 203,
     "correct": "akşamüzeri",
     "wrong": "akşam üzeri"
   },
   {
-    "id": 205,
+    "id": 204,
     "correct": "gündönümü",
     "wrong": "gün dönümü"
   },
   {
-    "id": 206,
+    "id": 205,
     "correct": "kuşburnu",
     "wrong": "kuş burnu"
   },
   {
-    "id": 207,
+    "id": 206,
     "correct": "kuşbakışı",
     "wrong": "kuş bakışı"
   },
   {
-    "id": 208,
+    "id": 207,
     "correct": "keçiboynuzu",
     "wrong": "keçi boynuzu"
   },
   {
-    "id": 209,
+    "id": 208,
     "correct": "süpermarket",
     "wrong": "süper market"
   },
   {
-    "id": 210,
+    "id": 209,
     "correct": "otopark",
     "wrong": "oto park"
   },
   {
-    "id": 211,
+    "id": 210,
     "correct": "otoyol",
     "wrong": "oto yol"
   },
   {
-    "id": 212,
+    "id": 211,
     "correct": "otogar",
     "wrong": "oto gar"
   },
   {
-    "id": 213,
+    "id": 212,
     "correct": "dünkü",
     "wrong": "dünki"
   },
   {
-    "id": 214,
+    "id": 213,
     "correct": "bugünkü",
     "wrong": "bugünki"
   },
   {
-    "id": 215,
+    "id": 214,
     "correct": "yarınki",
     "wrong": "yarınkü"
   },
   {
-    "id": 216,
+    "id": 215,
     "correct": "nerede",
     "wrong": "nerde"
   },
   {
-    "id": 217,
+    "id": 216,
     "correct": "müsaade",
     "wrong": "müsade"
   },
   {
-    "id": 218,
+    "id": 217,
     "correct": "muvaffakiyet",
     "wrong": "muvafakiyet"
   },
   {
-    "id": 219,
+    "id": 218,
     "correct": "teşebbüs",
     "wrong": "teşebüs"
   },
   {
-    "id": 220,
+    "id": 219,
     "correct": "taahhüt",
     "wrong": "taahüt"
   },
   {
-    "id": 221,
+    "id": 220,
     "correct": "ittifak",
     "wrong": "itifak"
   },
   {
-    "id": 222,
+    "id": 221,
     "correct": "hissetmek",
     "wrong": "hisetmek"
   },
   {
-    "id": 223,
+    "id": 222,
     "correct": "mahcup",
     "wrong": "mahçup"
   },
   {
-    "id": 224,
+    "id": 223,
     "correct": "zannetmek",
     "wrong": "zanetmek"
   },
   {
-    "id": 225,
+    "id": 224,
     "correct": "millet",
     "wrong": "milet"
   },
   {
-    "id": 226,
+    "id": 225,
     "correct": "hürriyet",
     "wrong": "hüriyet"
   },
   {
-    "id": 227,
+    "id": 226,
     "correct": "sıhhat",
     "wrong": "sıhat"
   },
   {
-    "id": 228,
+    "id": 227,
     "correct": "şiddet",
     "wrong": "şidet"
   },
   {
-    "id": 229,
+    "id": 228,
     "correct": "kuvvet",
     "wrong": "kuvet"
   },
   {
-    "id": 230,
+    "id": 229,
     "correct": "muhabbet",
     "wrong": "muhabet"
   },
   {
-    "id": 231,
+    "id": 230,
     "correct": "ehemmiyet",
     "wrong": "ehemiyet"
   },
   {
-    "id": 232,
+    "id": 231,
     "correct": "sünnet",
     "wrong": "sünet"
   },
   {
-    "id": 233,
+    "id": 232,
     "correct": "cennet",
     "wrong": "cenet"
   },
   {
-    "id": 234,
+    "id": 233,
     "correct": "cehennem",
     "wrong": "cehenem"
   },
   {
-    "id": 235,
+    "id": 234,
     "correct": "kitap",
     "wrong": "kitab"
   },
   {
-    "id": 236,
+    "id": 235,
     "correct": "ağaç",
     "wrong": "ağac"
   },
   {
-    "id": 237,
+    "id": 236,
     "correct": "renk",
     "wrong": "reng"
   },
   {
-    "id": 238,
+    "id": 237,
     "correct": "kanat",
     "wrong": "kanad"
   },
   {
-    "id": 239,
+    "id": 238,
     "correct": "pastane",
     "wrong": "pastahane"
   },
   {
-    "id": 240,
+    "id": 239,
     "correct": "kütüphane",
     "wrong": "kütübhane"
   },
   {
-    "id": 241,
+    "id": 240,
     "correct": "dershane",
     "wrong": "dersane"
   },
   {
-    "id": 242,
+    "id": 241,
     "correct": "postane",
     "wrong": "postahane"
   },
   {
-    "id": 243,
+    "id": 242,
     "correct": "egzotik",
     "wrong": "ekzotik"
   },
   {
-    "id": 244,
+    "id": 243,
     "correct": "ekstra",
     "wrong": "extra"
   },
   {
-    "id": 245,
+    "id": 244,
     "correct": "pesimist",
     "wrong": "pessimist"
   },
   {
-    "id": 246,
+    "id": 245,
     "correct": "alerji",
     "wrong": "allerji"
   },
   {
-    "id": 247,
-    "correct": "stres",
-    "wrong": "stress"
-  },
-  {
-    "id": 248,
-    "correct": "adres",
-    "wrong": "address"
-  },
-  {
-    "id": 249,
+    "id": 246,
     "correct": "bütçe",
     "wrong": "bütce"
   },
   {
-    "id": 250,
+    "id": 247,
     "correct": "repertuvar",
     "wrong": "repertuar"
   },
   {
-    "id": 251,
+    "id": 248,
     "correct": "şarj",
     "wrong": "şarz"
   },
   {
-    "id": 252,
+    "id": 249,
     "correct": "enfeksiyon",
     "wrong": "enfeksyon"
   },
   {
-    "id": 253,
-    "correct": "feribot",
-    "wrong": "feriboat"
-  },
-  {
-    "id": 254,
-    "correct": "tramvay",
-    "wrong": "tramway"
-  },
-  {
-    "id": 255,
+    "id": 250,
     "correct": "klavye",
     "wrong": "klavya"
   },
   {
-    "id": 256,
+    "id": 251,
     "correct": "çalışkan",
-    "wrong": "calışkan"
+    "wrong": "çalışgan"
   },
   {
-    "id": 257,
+    "id": 252,
     "correct": "kıskanç",
     "wrong": "kıskanc"
   },
   {
-    "id": 258,
+    "id": 253,
     "correct": "kebap",
     "wrong": "kebab"
   },
   {
-    "id": 259,
+    "id": 254,
     "correct": "fasulye",
-    "wrong": "fasulya"
+    "wrong": "fasülye"
   },
   {
-    "id": 260,
+    "id": 255,
     "correct": "domates",
     "wrong": "domatez"
   },
   {
-    "id": 261,
+    "id": 256,
     "correct": "mahkûm",
     "wrong": "mahkum"
   },
   {
-    "id": 262,
+    "id": 257,
     "correct": "mahzun",
     "wrong": "mahsun"
   },
   {
-    "id": 263,
+    "id": 258,
     "correct": "meşakkat",
     "wrong": "meşakat"
   },
   {
-    "id": 264,
+    "id": 259,
     "correct": "teessüf",
     "wrong": "teesüf"
   },
   {
-    "id": 265,
+    "id": 260,
     "correct": "tefekkür",
     "wrong": "tefekür"
   },
   {
-    "id": 266,
+    "id": 261,
     "correct": "tereddüt",
     "wrong": "tereddüd"
   },
   {
-    "id": 267,
+    "id": 262,
     "correct": "terennüm",
     "wrong": "terenüm"
   },
   {
-    "id": 268,
+    "id": 263,
     "correct": "vazife",
     "wrong": "vazüfe"
   },
   {
-    "id": 269,
+    "id": 264,
     "correct": "kâinat",
     "wrong": "kainat"
   },
   {
-    "id": 270,
+    "id": 265,
     "correct": "mükemmel",
     "wrong": "mükemel"
   },
   {
-    "id": 271,
+    "id": 266,
     "correct": "münevver",
     "wrong": "münever"
   },
   {
-    "id": 272,
+    "id": 267,
     "correct": "mübalağa",
     "wrong": "mübalaga"
   },
   {
-    "id": 273,
+    "id": 268,
     "correct": "sıhhi",
     "wrong": "sıhi"
   },
   {
-    "id": 274,
+    "id": 269,
     "correct": "tahammül",
     "wrong": "tahamül"
   },
   {
-    "id": 275,
+    "id": 270,
     "correct": "cazibe",
     "wrong": "cazübe"
   },
   {
-    "id": 276,
+    "id": 271,
     "correct": "garip",
     "wrong": "garib"
   },
   {
-    "id": 277,
+    "id": 272,
     "correct": "iddia",
-    "wrong": "idia"
+    "wrong": "idda"
   },
   {
-    "id": 278,
+    "id": 273,
     "correct": "mahsul",
     "wrong": "mahsül"
   },
   {
-    "id": 279,
+    "id": 274,
     "correct": "nasihat",
     "wrong": "nasiat"
   },
   {
-    "id": 280,
+    "id": 275,
     "correct": "sarraf",
     "wrong": "saraf"
   },
   {
-    "id": 281,
+    "id": 276,
     "correct": "bir yandan",
     "wrong": "biryandan"
   },
   {
-    "id": 282,
+    "id": 277,
     "correct": "ne var ki",
     "wrong": "nevarki"
   },
   {
-    "id": 283,
+    "id": 278,
     "correct": "bir hayli",
     "wrong": "birhayli"
   },
   {
-    "id": 284,
+    "id": 279,
     "correct": "her defasında",
     "wrong": "herdefasında"
   },
   {
-    "id": 285,
+    "id": 280,
     "correct": "her seferinde",
     "wrong": "herseferinde"
   },
   {
-    "id": 286,
+    "id": 281,
     "correct": "uzun süre",
     "wrong": "uzunsüre"
   },
   {
-    "id": 287,
+    "id": 282,
     "correct": "kısa süre",
     "wrong": "kısasüre"
   },
   {
-    "id": 288,
+    "id": 283,
     "correct": "gökyüzü",
     "wrong": "gök yüzü"
   },
   {
-    "id": 289,
+    "id": 284,
     "correct": "denizaltı",
     "wrong": "deniz altı"
   },
   {
-    "id": 290,
+    "id": 285,
     "correct": "elmacık",
     "wrong": "elma cık"
   },
   {
-    "id": 291,
+    "id": 286,
     "correct": "sandalye",
     "wrong": "sandalya"
   },
   {
-    "id": 292,
+    "id": 287,
     "correct": "ayakkabı",
     "wrong": "ayakabı"
   },
   {
-    "id": 293,
+    "id": 288,
     "correct": "çaydanlık",
     "wrong": "caydanlık"
   },
   {
-    "id": 294,
+    "id": 289,
     "correct": "burnu",
     "wrong": "burunu"
   },
   {
-    "id": 295,
+    "id": 290,
     "correct": "ağzı",
     "wrong": "ağızı"
   },
   {
-    "id": 296,
+    "id": 291,
     "correct": "omzu",
     "wrong": "omuzu"
   },
   {
-    "id": 297,
+    "id": 292,
     "correct": "oğlu",
     "wrong": "oğulu"
   },
   {
-    "id": 298,
+    "id": 293,
     "correct": "şehri",
     "wrong": "şehiri"
   },
   {
-    "id": 299,
+    "id": 294,
     "correct": "fikri",
     "wrong": "fikiri"
   },
   {
-    "id": 300,
-    "correct": "gelmiyor",
-    "wrong": "gelmeyor"
-  },
-  {
-    "id": 301,
-    "correct": "sevmiyor",
-    "wrong": "sevmeyor"
-  },
-  {
-    "id": 302,
-    "correct": "etmiyor",
-    "wrong": "etmeyor"
-  },
-  {
-    "id": 303,
-    "correct": "gitmiyor",
-    "wrong": "gitmeyor"
-  },
-  {
-    "id": 304,
-    "correct": "diyor",
-    "wrong": "deyor"
-  },
-  {
-    "id": 305,
-    "correct": "yiyor",
-    "wrong": "yeyor"
-  },
-  {
-    "id": 306,
-    "correct": "söylüyor",
-    "wrong": "söyleyor"
-  },
-  {
-    "id": 307,
+    "id": 295,
     "correct": "hallolmak",
     "wrong": "halolmak"
   },
   {
-    "id": 308,
+    "id": 296,
     "correct": "ağaçtan",
     "wrong": "ağaçdan"
   },
   {
-    "id": 309,
+    "id": 297,
     "correct": "kitaptan",
-    "wrong": "kitabdan"
+    "wrong": "kitapdan"
   },
   {
-    "id": 310,
+    "id": 298,
     "correct": "çokça",
     "wrong": "çokca"
   },
   {
-    "id": 311,
+    "id": 299,
     "correct": "renkler",
     "wrong": "rengler"
   },
   {
-    "id": 312,
+    "id": 300,
     "correct": "dolaplar",
     "wrong": "dolablar"
   },
   {
-    "id": 313,
+    "id": 301,
     "correct": "sebep",
     "wrong": "sebeb"
   },
   {
-    "id": 314,
+    "id": 302,
     "correct": "küçücük",
     "wrong": "küçüçük"
   },
   {
-    "id": 315,
+    "id": 303,
     "correct": "birbiri",
     "wrong": "bir biri"
   },
   {
-    "id": 316,
+    "id": 304,
     "correct": "dışbükey",
     "wrong": "dış bükey"
   },
   {
-    "id": 317,
+    "id": 305,
     "correct": "içbükey",
     "wrong": "iç bükey"
   },
   {
-    "id": 318,
+    "id": 306,
     "correct": "seçal",
     "wrong": "seç al"
   },
   {
-    "id": 319,
+    "id": 307,
     "correct": "yapboz",
     "wrong": "yap boz"
   },
   {
-    "id": 320,
+    "id": 308,
     "correct": "batçık",
     "wrong": "bat çık"
   },
   {
-    "id": 321,
+    "id": 309,
     "correct": "vişneçürüğü",
     "wrong": "vişne çürüğü"
   },
   {
-    "id": 322,
+    "id": 310,
     "correct": "içli köfte",
     "wrong": "içliköfte"
   },
   {
-    "id": 323,
+    "id": 311,
     "correct": "koz helvası",
     "wrong": "kozhelvası"
   },
   {
-    "id": 324,
+    "id": 312,
     "correct": "kuyruklu yıldız",
     "wrong": "kuyrukluyıldız"
   },
   {
-    "id": 325,
+    "id": 313,
     "correct": "göçerkonar",
     "wrong": "göçer konar"
   },
   {
-    "id": 326,
+    "id": 314,
     "correct": "konargöçer",
     "wrong": "konar göçer"
   },
   {
-    "id": 327,
+    "id": 315,
     "correct": "yazar kasa",
     "wrong": "yazarkasa"
   },
   {
-    "id": 328,
+    "id": 316,
     "correct": "kızılkurt",
     "wrong": "kızıl kurt"
   },
   {
-    "id": 329,
+    "id": 317,
     "correct": "pembekurt",
     "wrong": "pembe kurt"
   },
   {
-    "id": 330,
+    "id": 318,
     "correct": "sarıbalık",
     "wrong": "sarı balık"
   },
   {
-    "id": 331,
+    "id": 319,
     "correct": "mavisinek",
     "wrong": "mavi sinek"
   },
   {
-    "id": 332,
+    "id": 320,
     "correct": "karafatma",
     "wrong": "kara fatma"
   },
   {
-    "id": 333,
+    "id": 321,
     "correct": "baklaçiçeği",
     "wrong": "bakla çiçeği"
   },
   {
-    "id": 334,
+    "id": 322,
     "correct": "ana dal",
     "wrong": "anadal"
   },
   {
-    "id": 335,
+    "id": 323,
     "correct": "âlem",
     "wrong": "alem"
   },
   {
-    "id": 336,
+    "id": 324,
     "correct": "camgöbeği",
     "wrong": "cam göbeği"
   },
   {
-    "id": 337,
+    "id": 325,
     "correct": "albeni",
     "wrong": "al beni"
   },
   {
-    "id": 338,
+    "id": 326,
     "correct": "dil balığı",
     "wrong": "dilbalığı"
   },
   {
-    "id": 339,
+    "id": 327,
     "correct": "denizatı",
     "wrong": "deniz atı"
   },
   {
-    "id": 340,
+    "id": 328,
     "correct": "keçi yolu",
     "wrong": "keçiyolu"
   },
   {
-    "id": 341,
+    "id": 329,
     "correct": "ipek yolu",
     "wrong": "ipekyolu"
   },
   {
-    "id": 342,
+    "id": 330,
     "correct": "dalgakıran",
     "wrong": "dalga kıran"
   },
   {
-    "id": 343,
+    "id": 331,
     "correct": "değerbilmez",
     "wrong": "değer bilmez"
   },
   {
-    "id": 344,
+    "id": 332,
     "correct": "güler yüz",
     "wrong": "güleryüz"
   },
   {
-    "id": 345,
+    "id": 333,
     "correct": "sinemasever",
     "wrong": "sinema sever"
   },
   {
-    "id": 346,
+    "id": 334,
     "correct": "kitapsever",
     "wrong": "kitap sever"
   },
   {
-    "id": 347,
+    "id": 335,
     "correct": "sıcaklıkölçer",
     "wrong": "sıcaklık ölçer"
   },
   {
-    "id": 348,
+    "id": 336,
     "correct": "kalburüstü",
     "wrong": "kalbur üstü"
   },
   {
-    "id": 349,
+    "id": 337,
     "correct": "ayaküzeri",
     "wrong": "ayak üzeri"
   },
   {
-    "id": 350,
+    "id": 338,
     "correct": "dizüstü",
     "wrong": "diz üstü"
   },
   {
-    "id": 351,
+    "id": 339,
     "correct": "bilinçaltı",
     "wrong": "bilinç altı"
   },
   {
-    "id": 352,
+    "id": 340,
     "correct": "ikindiüstü",
     "wrong": "ikindi üstü"
   },
   {
-    "id": 353,
+    "id": 341,
     "correct": "akşamüstü",
     "wrong": "akşam üstü"
   },
   {
-    "id": 354,
+    "id": 342,
     "correct": "su altı",
     "wrong": "sualtı"
   },
   {
-    "id": 355,
+    "id": 343,
     "correct": "her an",
     "wrong": "heran"
   },
   {
-    "id": 356,
+    "id": 355,
     "correct": "biraz",
     "wrong": "bir az"
   },
   {
-    "id": 357,
+    "id": 345,
     "correct": "barışsever",
     "wrong": "barış sever"
   },
   {
-    "id": 358,
+    "id": 346,
     "correct": "basınçölçer",
     "wrong": "basınç ölçer"
   },
   {
-    "id": 359,
+    "id": 347,
     "correct": "bakar kör",
     "wrong": "bakarkör"
   },
   {
-    "id": 360,
+    "id": 348,
     "correct": "etyemez",
     "wrong": "et yemez"
   },
   {
-    "id": 361,
+    "id": 349,
     "correct": "varyemez",
     "wrong": "var yemez"
   },
   {
-    "id": 362,
+    "id": 350,
     "correct": "olağan dışı",
     "wrong": "olağandışı"
   },
   {
-    "id": 363,
+    "id": 351,
     "correct": "alt yazı",
     "wrong": "altyazı"
   },
   {
-    "id": 364,
+    "id": 352,
     "correct": "bir başına",
     "wrong": "birbaşına"
   },
   {
-    "id": 365,
+    "id": 353,
     "correct": "bir türlü",
     "wrong": "birtürlü"
   },
   {
-    "id": 366,
+    "id": 354,
     "correct": "mavibalina",
     "wrong": "mavi balina"
   },
   {
-    "id": 367,
+    "id": 355,
     "correct": "mormenekşe",
     "wrong": "mor menekşe"
   },
   {
-    "id": 368,
+    "id": 356,
     "correct": "alageyik",
     "wrong": "ala geyik"
   },
   {
-    "id": 369,
+    "id": 357,
     "correct": "deve dikeni",
     "wrong": "devedikeni"
   },
   {
-    "id": 370,
+    "id": 358,
     "correct": "şeker kamışı",
     "wrong": "şekerkamışı"
   },
   {
-    "id": 371,
+    "id": 359,
     "correct": "eloğlu",
     "wrong": "el oğlu"
   },
   {
-    "id": 372,
+    "id": 360,
     "correct": "elkızı",
     "wrong": "el kızı"
   },
   {
-    "id": 373,
+    "id": 361,
     "correct": "çiğ köfte",
     "wrong": "çiğköfte"
   },
   {
-    "id": 374,
+    "id": 362,
     "correct": "beşbıyık",
     "wrong": "beş bıyık"
   },
   {
-    "id": 375,
+    "id": 363,
     "correct": "kedigözü",
     "wrong": "kedi gözü"
   },
   {
-    "id": 376,
+    "id": 364,
     "correct": "bıyıklı balık",
     "wrong": "bıyıklıbalık"
   },
   {
-    "id": 377,
+    "id": 365,
     "correct": "alabalık",
     "wrong": "ala balık"
   },
   {
-    "id": 378,
+    "id": 366,
     "correct": "şıpsevdi",
     "wrong": "şıp sevdi"
   },
   {
-    "id": 379,
+    "id": 367,
     "correct": "suçüstü",
     "wrong": "suç üstü"
   },
   {
-    "id": 380,
+    "id": 368,
     "correct": "kırmızıbiber",
     "wrong": "kırmızı biber"
   },
   {
-    "id": 381,
+    "id": 369,
     "correct": "yeşilbiber",
     "wrong": "yeşil biber"
   },
   {
-    "id": 382,
+    "id": 370,
     "correct": "sivri biber",
     "wrong": "sivribiber"
   },
   {
-    "id": 383,
+    "id": 371,
     "correct": "dolma biber",
     "wrong": "dolmabiber"
   },
   {
-    "id": 384,
+    "id": 372,
     "correct": "pul biber",
     "wrong": "pulbiber"
   },
   {
-    "id": 385,
+    "id": 373,
     "correct": "karabiber",
     "wrong": "kara biber"
   },
   {
-    "id": 386,
+    "id": 374,
     "correct": "beyazsinek",
     "wrong": "beyaz sinek"
   },
   {
-    "id": 387,
+    "id": 375,
     "correct": "karasinek",
     "wrong": "kara sinek"
+  },
+  {
+    "id": 376,
+    "correct": "acayip",
+    "wrong": "acaip"
+  },
+  {
+    "id": 377,
+    "correct": "acente",
+    "wrong": "acenta"
+  },
+  {
+    "id": 378,
+    "correct": "ajitasyon",
+    "wrong": "acitasyon"
+  },
+  {
+    "id": 379,
+    "correct": "altyapı",
+    "wrong": "alt yapı"
+  },
+  {
+    "id": 380,
+    "correct": "lavabo",
+    "wrong": "lavobo"
+  },
+  {
+    "id": 381,
+    "correct": "ambiyans",
+    "wrong": "ambians"
+  },
+  {
+    "id": 382,
+    "correct": "amfi",
+    "wrong": "anfi"
+  },
+  {
+    "id": 383,
+    "correct": "antparantez",
+    "wrong": "antiparantez"
+  },
+  {
+    "id": 384,
+    "correct": "apandisit",
+    "wrong": "apandist"
+  },
+  {
+    "id": 385,
+    "correct": "aperitif",
+    "wrong": "aparatif"
+  },
+  {
+    "id": 386,
+    "correct": "aperitif",
+    "wrong": "aperatif"
+  },
+  {
+    "id": 387,
+    "correct": "arife",
+    "wrong": "arefe"
+  },
+  {
+    "id": 388,
+    "correct": "art arda",
+    "wrong": "ardarda"
+  },
+  {
+    "id": 389,
+    "correct": "asfalt",
+    "wrong": "asvalt"
+  },
+  {
+    "id": 390,
+    "correct": "aşçı",
+    "wrong": "aşcı"
+  },
+  {
+    "id": 391,
+    "correct": "aşçı",
+    "wrong": "ahçı"
+  },
+  {
+    "id": 392,
+    "correct": "konservatuvar",
+    "wrong": "konservatuar"
+  },
+  {
+    "id": 393,
+    "correct": "konteyner",
+    "wrong": "konteynır"
+  },
+  {
+    "id": 394,
+    "correct": "küvöz",
+    "wrong": "küvöz"
+  },
+  {
+    "id": 395,
+    "correct": "mademki",
+    "wrong": "madem ki"
+  },
+  {
+    "id": 396,
+    "correct": "mahcup",
+    "wrong": "mahcup"
+  },
+  {
+    "id": 397,
+    "correct": "oysaki",
+    "wrong": "oysa ki"
+  },
+  {
+    "id": 398,
+    "correct": "öngörü",
+    "wrong": "ön görü"
+  },
+  {
+    "id": 399,
+    "correct": "önsezi",
+    "wrong": "ön sezi"
+  },
+  {
+    "id": 400,
+    "correct": "ötanazi",
+    "wrong": "ötenazi"
+  },
+  {
+    "id": 401,
+    "correct": "özbeöz",
+    "wrong": "öz ve öz"
+  },
+  {
+    "id": 402,
+    "correct": "öz geçmiş",
+    "wrong": "özgeçmiş"
+  },
+  {
+    "id": 403,
+    "correct": "panikatak",
+    "wrong": "panik atak"
+  },
+  {
+    "id": 404,
+    "correct": "panorama",
+    "wrong": "panaroma"
+  },
+  {
+    "id": 405,
+    "correct": "parantez",
+    "wrong": "parentez"
+  },
+  {
+    "id": 406,
+    "correct": "pardösü",
+    "wrong": "pardesü"
+  },
+  {
+    "id": 407,
+    "correct": "aperitif",
+    "wrong": "aparatif"
+  },
+  {
+    "id": 408,
+    "correct": "aperitif",
+    "wrong": "aperatif"
+  },
+  {
+    "id": 409,
+    "correct": "gardırop",
+    "wrong": "gardrop"
+  },
+  {
+    "id": 410,
+    "correct": "gardırop",
+    "wrong": "gardolap"
+  },
+  {
+    "id": 411,
+    "correct": "gasbetmek",
+    "wrong": "gasp etmek"
+  },
+  {
+    "id": 412,
+    "correct": "glikoz",
+    "wrong": "glukoz"
+  },
+  {
+    "id": 413,
+    "correct": "glüten",
+    "wrong": "gluten"
+  },
+  {
+    "id": 414,
+    "correct": "kuruyemiş",
+    "wrong": "kuru yemiş"
+  },
+  {
+    "id": 415,
+    "correct": "kuru soğan",
+    "wrong": "kurusoğan"
+  },
+  {
+    "id": 416,
+    "correct": "semizotu",
+    "wrong": "semiz otu"
+  },
+  {
+    "id": 417,
+    "correct": "dereotu",
+    "wrong": "dere otu"
+  },
+  {
+    "id": 418,
+    "correct": "kuşburnu",
+    "wrong": "kuş burnu"
+  },
+  {
+    "id": 419,
+    "correct": "keçiboynuzu",
+    "wrong": "keçi boynuzu"
+  },
+  {
+    "id": 420,
+    "correct": "ayçiçeği",
+    "wrong": "ay çiçeği"
+  },
+  {
+    "id": 421,
+    "correct": "zeytinyağı",
+    "wrong": "zeytin yağı"
+  },
+  {
+    "id": 422,
+    "correct": "tereyağı",
+    "wrong": "tere yağı"
+  },
+  {
+    "id": 423,
+    "correct": "pekmeztoprağı",
+    "wrong": "pekmez toprağı"
+  },
+  {
+    "id": 424,
+    "correct": "denizaltı",
+    "wrong": "deniz altı"
+  },
+  {
+    "id": 425,
+    "correct": "bilinçaltı",
+    "wrong": "bilinç altı"
+  },
+  {
+    "id": 426,
+    "correct": "suçüstü",
+    "wrong": "suç üstü"
+  },
+  {
+    "id": 427,
+    "correct": "akşamüstü",
+    "wrong": "akşam üstü"
+  },
+  {
+    "id": 428,
+    "correct": "ayaküstü",
+    "wrong": "ayak üstü"
+  },
+  {
+    "id": 429,
+    "correct": "olağanüstü",
+    "wrong": "olağan üstü"
+  },
+  {
+    "id": 430,
+    "correct": "yüzüstü",
+    "wrong": "yüz üstü"
+  },
+  {
+    "id": 431,
+    "correct": "başüstüne",
+    "wrong": "baş üstüne"
+  },
+  {
+    "id": 432,
+    "correct": "gözaltı",
+    "wrong": "göz altı"
+  },
+  {
+    "id": 433,
+    "correct": "işbirliği",
+    "wrong": "iş birliği"
+  },
+  {
+    "id": 434,
+    "correct": "işveren",
+    "wrong": "iş veren"
+  },
+  {
+    "id": 435,
+    "correct": "işyeri",
+    "wrong": "iş yeri"
+  },
+  {
+    "id": 436,
+    "correct": "başhekim",
+    "wrong": "baş hekim"
+  },
+  {
+    "id": 437,
+    "correct": "başkent",
+    "wrong": "baş kent"
+  },
+  {
+    "id": 438,
+    "correct": "anavatan",
+    "wrong": "ana vatan"
+  },
+  {
+    "id": 439,
+    "correct": "anayasa",
+    "wrong": "ana yasa"
+  },
+  {
+    "id": 440,
+    "correct": "öngörü",
+    "wrong": "ön görü"
+  },
+  {
+    "id": 441,
+    "correct": "önyargı",
+    "wrong": "ön yargı"
+  },
+  {
+    "id": 442,
+    "correct": "varsayım",
+    "wrong": "var sayım"
+  },
+  {
+    "id": 443,
+    "correct": "vazgeçmek",
+    "wrong": "vaz geçmek"
+  },
+  {
+    "id": 444,
+    "correct": "başvurmak",
+    "wrong": "baş vurmak"
+  },
+  {
+    "id": 445,
+    "correct": "öngörmek",
+    "wrong": "ön görmek"
+  },
+  {
+    "id": 446,
+    "correct": "dedikodu",
+    "wrong": "dedi kodu"
+  },
+  {
+    "id": 447,
+    "correct": "gecekondu",
+    "wrong": "gece kondu"
+  },
+  {
+    "id": 448,
+    "correct": "mirasyedi",
+    "wrong": "miras yedi"
+  },
+  {
+    "id": 449,
+    "correct": "maydanoz",
+    "wrong": "maydonoz"
+  },
+  {
+    "id": 450,
+    "correct": "komiser",
+    "wrong": "komser"
+  },
+  {
+    "id": 451,
+    "correct": "poğaça",
+    "wrong": "poğça"
+  },
+  {
+    "id": 452,
+    "correct": "ön yargı",
+    "wrong": "önyargı"
+  },
+  {
+    "id": 453,
+    "correct": "yanı sıra",
+    "wrong": "yanısıra"
+  },
+  {
+    "id": 454,
+    "correct": "stajyer",
+    "wrong": "stajer"
+  },
+  {
+    "id": 455,
+    "correct": "sağ ol",
+    "wrong": "sağol"
+  },
+  {
+    "id": 456,
+    "correct": "başkişi",
+    "wrong": "baş kişi"
+  },
+  {
+    "id": 457,
+    "correct": "bilim insanı",
+    "wrong": "biliminsanı"
+  },
+  {
+    "id": 458,
+    "correct": "şövalye",
+    "wrong": "şovalye"
+  },
+  {
+    "id": 459,
+    "correct": "özel mülkiyet",
+    "wrong": "özelmülkiyet"
+  },
+  {
+    "id": 460,
+    "correct": "herkesçe",
+    "wrong": "herkezce"
+  },
+  {
+    "id": 461,
+    "correct": "barışsever",
+    "wrong": "barış sever"
+  },
+  {
+    "id": 462,
+    "correct": "yetkinlikle",
+    "wrong": "yetginlikle"
+  },
+  {
+    "id": 463,
+    "correct": "morötesi",
+    "wrong": "mor ötesi"
+  },
+  {
+    "id": 464,
+    "correct": "ana vatan",
+    "wrong": "anavatan"
+  },
+  {
+    "id": 465,
+    "correct": "nüfus",
+    "wrong": "nufüs"
+  },
+  {
+    "id": 466,
+    "correct": "sıra dışı",
+    "wrong": "sıradışı"
+  },
+  {
+    "id": 467,
+    "correct": "ön yargı",
+    "wrong": "önyargı"
+  },
+  {
+    "id": 468,
+    "correct": "karınca incitmez",
+    "wrong": "karıncaincitmez"
+  },
+  {
+    "id": 469,
+    "correct": "herhangi bir",
+    "wrong": "herhangibir"
+  },
+  {
+    "id": 470,
+    "correct": "cırcır böceği",
+    "wrong": "cırcırböceği"
+  },
+  {
+    "id": 471,
+    "correct": "kavuniçi",
+    "wrong": "kavun içi"
+  },
+  {
+    "id": 472,
+    "correct": "narçiçeği",
+    "wrong": "nar çiçeği"
+  },
+  {
+    "id": 473,
+    "correct": "bülbülyuvası",
+    "wrong": "bülbül yuvası"
+  },
+  {
+    "id": 474,
+    "correct": "beşbıyık",
+    "wrong": "beş bıyık"
+  },
+  {
+    "id": 475,
+    "correct": "yurt dışı",
+    "wrong": "yurtdışı"
+  },
+  {
+    "id": 476,
+    "correct": "akşamüzeri",
+    "wrong": "akşam üzeri"
+  },
+  {
+    "id": 477,
+    "correct": "kargaburnu",
+    "wrong": "karga burnu"
+  },
+  {
+    "id": 478,
+    "correct": "ana dili",
+    "wrong": "anadili"
+  },
+  {
+    "id": 479,
+    "correct": "yazıhane",
+    "wrong": "yazı hane"
+  },
+  {
+    "id": 480,
+    "correct": "basınçölçer",
+    "wrong": "basınç ölçer"
+  },
+  {
+    "id": 481,
+    "correct": "ayaküstü",
+    "wrong": "ayak üstü"
+  },
+  {
+    "id": 482,
+    "correct": "bilinçaltı",
+    "wrong": "bilinç altı"
+  },
+  {
+    "id": 483,
+    "correct": "yanı başı",
+    "wrong": "yanıbaşı"
+  },
+  {
+    "id": 484,
+    "correct": "tamtakır",
+    "wrong": "tam takır"
+  },
+  {
+    "id": 485,
+    "correct": "unvan",
+    "wrong": "ünvan"
+  },
+  {
+    "id": 486,
+    "correct": "ajitasyon",
+    "wrong": "acitasyon"
+  },
+  {
+    "id": 487,
+    "correct": "mide",
+    "wrong": "miğde"
+  },
+  {
+    "id": 488,
+    "correct": "gardırop",
+    "wrong": "gardolap"
+  },
+  {
+    "id": 489,
+    "correct": "cereyan",
+    "wrong": "ceryan"
+  },
+  {
+    "id": 490,
+    "correct": "şu an",
+    "wrong": "şuan"
+  },
+  {
+    "id": 491,
+    "correct": "binbaşı",
+    "wrong": "bin başı"
+  },
+  {
+    "id": 492,
+    "correct": "elebaşı",
+    "wrong": "ele başı"
+  },
+  {
+    "id": 493,
+    "correct": "ustabaşı",
+    "wrong": "usta başı"
+  },
+  {
+    "id": 494,
+    "correct": "başbakan",
+    "wrong": "baş bakan"
+  },
+  {
+    "id": 495,
+    "correct": "başçavuş",
+    "wrong": "baş çavuş"
+  },
+  {
+    "id": 496,
+    "correct": "başhekim",
+    "wrong": "baş hekim"
+  },
+  {
+    "id": 497,
+    "correct": "öz güven",
+    "wrong": "özgüven"
+  },
+  {
+    "id": 498,
+    "correct": "özveri",
+    "wrong": "öz veri"
+  },
+  {
+    "id": 499,
+    "correct": "kaybolmak",
+    "wrong": "kayıp olmak"
+  },
+  {
+    "id": 500,
+    "correct": "hissetmek",
+    "wrong": "his etmek"
+  },
+  {
+    "id": 501,
+    "correct": "arz etmek",
+    "wrong": "arzetmek"
+  },
+  {
+    "id": 502,
+    "correct": "terk etmek",
+    "wrong": "terketmek"
+  },
+  {
+    "id": 503,
+    "correct": "ayırt etmek",
+    "wrong": "ayırtetmek"
+  },
+  {
+    "id": 504,
+    "correct": "çevrim içi",
+    "wrong": "çevrimiçi"
+  },
+  {
+    "id": 505,
+    "correct": "kuru yemiş",
+    "wrong": "kuruyemiş"
+  },
+  {
+    "id": 506,
+    "correct": "çevrim dışı",
+    "wrong": "çevrimdışı"
+  },
+  {
+    "id": 507,
+    "correct": "boş ver",
+    "wrong": "boşver"
+  },
+  {
+    "id": 508,
+    "correct": "öngörü",
+    "wrong": "ön görü"
+  },
+  {
+    "id": 509,
+    "correct": "başvuru",
+    "wrong": "baş vuru"
   }
 ]

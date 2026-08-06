@@ -11,6 +11,7 @@ import '../../data/repositories/mock_leaderboard_repository.dart';
 import '../../data/repositories/stats_repository_impl.dart';
 import '../../data/repositories/streak_repository_impl.dart';
 import '../../data/repositories/word_repository_impl.dart';
+import '../../data/services/auth_service.dart';
 import '../../domain/models/leaderboard_entry.dart';
 import '../../domain/repositories/favorites_repository.dart';
 import '../../domain/repositories/lives_repository.dart';
@@ -22,6 +23,10 @@ import '../../domain/repositories/word_repository.dart';
 /// Overridden in [main] after SharedPreferences is ready.
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('sharedPreferencesProvider must be overridden');
+});
+
+final authServiceProvider = Provider<AuthService>((ref) {
+  return AuthService();
 });
 
 final wordRepositoryProvider = Provider<WordRepository>((ref) {
