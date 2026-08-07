@@ -4,13 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/study_mode.dart';
+import '../navigation/soft_transitions.dart';
 import '../navigation/study_navigation.dart';
 
 Future<void> showChallengePresetsSheet(
   BuildContext context,
   WidgetRef ref,
 ) {
-  return showModalBottomSheet<void>(
+  return showSoftModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,

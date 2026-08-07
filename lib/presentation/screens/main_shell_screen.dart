@@ -20,20 +20,75 @@ class MainShellScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: PlayfulBackground(
-        child: IndexedStack(
-          index: index,
-          children: const [
-            HomeScreen(embedded: true),
-            WordSearchScreen(embedded: true),
-            FavoritesScreen(embedded: true),
-            LeaderboardScreen(embedded: true),
-          ],
-        ),
+        child: _SoftTabBody(index: index),
       ),
       bottomNavigationBar: _AppBottomBar(
         index: index,
         onChanged: (i) =>
             ref.read(mainTabIndexProvider.notifier).setIndex(i),
+      ),
+    );
+  }
+}
+
+/// Fades the active tab as one layer, then swaps — never stacks two pages.
+class _SoftTabBody extends StatefulWidget {
+  const _SoftTabBody({required this.index});
+
+  final int index;
+
+  @override
+  State<_SoftTabBody> createState() => _SoftTabBodyState();
+}
+
+class _SoftTabBodyState extends State<_SoftTabBody> {
+  static const _tabs = <Widget>[
+    HomeScreen(embedded: true),
+    WordSearchScreen(embedded: true),
+    FavoritesScreen(embedded: true),
+    LeaderboardScreen(embedded: true),
+  ];
+
+  late int _visibleIndex;
+  double _opacity = 1;
+  int _fadeToken = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _visibleIndex = widget.index;
+  }
+
+  @override
+  void didUpdateWidget(covariant _SoftTabBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.index != widget.index) {
+      _animateTo(widget.index);
+    }
+  }
+
+  Future<void> _animateTo(int next) async {
+    final token = ++_fadeToken;
+    setState(() => _opacity = 0);
+
+    await Future<void>.delayed(AppConstants.tabTransition ~/ 2);
+    if (!mounted || token != _fadeToken) return;
+
+    setState(() {
+      _visibleIndex = next;
+      _opacity = 1;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: _opacity,
+      duration: AppConstants.tabTransition ~/ 2,
+      curve: AppConstants.pageCurve,
+      child: IndexedStack(
+        index: _visibleIndex,
+        children: _tabs,
       ),
     );
   }
@@ -118,8 +173,8 @@ class _NavItem extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOutCubic,
+          duration: AppConstants.tabTransition,
+          curve: AppConstants.pageCurve,
           padding: EdgeInsets.symmetric(
             horizontal: selected ? 10 : 6,
             vertical: 8,
@@ -131,20 +186,29 @@ class _NavItem extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: 22,
-                color: selected ? Colors.white : AppColors.textPrimary,
+              AnimatedScale(
+                scale: selected ? 1.06 : 1,
+                duration: AppConstants.tabTransition,
+                curve: AppConstants.pageCurve,
+                child: Icon(
+                  icon,
+                  size: 22,
+                  color: selected ? Colors.white : AppColors.textPrimary,
+                ),
               ),
               const SizedBox(height: 2),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              AnimatedDefaultTextStyle(
+                duration: AppConstants.tabTransition,
+                curve: AppConstants.pageCurve,
                 style: AppTypography.body(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: selected ? Colors.white : AppColors.textPrimary,
+                ),
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

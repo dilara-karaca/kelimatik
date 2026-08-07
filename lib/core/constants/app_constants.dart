@@ -10,6 +10,12 @@ abstract final class AppConstants {
 
   static const int maxLives = 5;
   static const Duration lifeRegenDuration = Duration(minutes: 2);
+
+  static const Duration pageTransition = Duration(milliseconds: 420);
+  static const Duration pageReverseTransition = Duration(milliseconds: 320);
+  static const Curve pageCurve = Curves.easeOutCubic;
+  static const Curve pageReverseCurve = Curves.easeInCubic;
+  static const Duration tabTransition = Duration(milliseconds: 280);
 }
 
 /// Playful but balanced color tokens.

@@ -17,26 +17,50 @@ class AuthGate extends ConsumerWidget {
     final auth = ref.watch(authProvider);
     final profile = ref.watch(currentProfileProvider);
 
-    switch (auth.status) {
-      case AppAuthStatus.unknown:
-        return const _BootScaffold();
-      case AppAuthStatus.unauthenticated:
-        return const LoginScreen();
-      case AppAuthStatus.authenticated:
-        if (profile.isReady) {
-          return const MainShellScreen();
-        }
-        if (profile.status == ProfileLoadStatus.error) {
-          return _ProfileErrorScaffold(
-            message: profile.errorMessage ??
-                'Profil hazırlanamadı. Lütfen tekrar dene.',
-            onRetry: () =>
-                ref.read(currentProfileProvider.notifier).ensureProfile(),
-            onSignOut: () => ref.read(authProvider.notifier).signOut(),
-          );
-        }
-        return const _BootScaffold(label: 'Profil hazırlanıyor...');
-    }
+    final child = switch (auth.status) {
+      AppAuthStatus.unknown => const _BootScaffold(),
+      AppAuthStatus.unauthenticated => const LoginScreen(),
+      AppAuthStatus.authenticated => () {
+          if (profile.isReady) {
+            return const MainShellScreen();
+          }
+          if (profile.status == ProfileLoadStatus.error) {
+            return _ProfileErrorScaffold(
+              message: profile.errorMessage ??
+                  'Profil hazırlanamadı. Lütfen tekrar dene.',
+              onRetry: () =>
+                  ref.read(currentProfileProvider.notifier).ensureProfile(),
+              onSignOut: () => ref.read(authProvider.notifier).signOut(),
+            );
+          }
+          return const _BootScaffold(label: 'Profil hazırlanıyor...');
+        }(),
+    };
+
+    return AnimatedSwitcher(
+      duration: AppConstants.pageTransition,
+      reverseDuration: AppConstants.pageReverseTransition,
+      switchInCurve: AppConstants.pageCurve,
+      switchOutCurve: AppConstants.pageReverseCurve,
+      transitionBuilder: (widget, animation) {
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.03),
+              end: Offset.zero,
+            ).animate(animation),
+            child: widget,
+          ),
+        );
+      },
+      child: KeyedSubtree(
+        key: ValueKey<String>(
+          '${auth.status.name}-${profile.status.name}-${profile.isReady}',
+        ),
+        child: child,
+      ),
+    );
   }
 }
 

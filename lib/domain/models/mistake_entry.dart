@@ -68,22 +68,29 @@ class MistakeEntry {
   }
 
   factory MistakeEntry.fromJson(Map<String, dynamic> json) {
+    int asInt(Object? value, [int fallback = 0]) {
+      if (value is int) return value;
+      if (value is num) return value.toInt();
+      if (value is String) return int.tryParse(value) ?? fallback;
+      return fallback;
+    }
+
     return MistakeEntry(
-      wordId: json['wordId'] as int,
-      wrongCount: json['wrongCount'] as int? ?? 1,
-      correctSinceMissCount: json['correctSinceMissCount'] as int? ?? 0,
+      wordId: asInt(json['wordId']),
+      wrongCount: asInt(json['wrongCount'], 1),
+      correctSinceMissCount: asInt(json['correctSinceMissCount']),
       firstMissedAt: DateTime.fromMillisecondsSinceEpoch(
-        json['firstMissedAt'] as int,
+        asInt(json['firstMissedAt']),
       ),
       lastMissedAt: DateTime.fromMillisecondsSinceEpoch(
-        json['lastMissedAt'] as int,
+        asInt(json['lastMissedAt']),
       ),
       lastCorrectAt: json['lastCorrectAt'] == null
           ? null
-          : DateTime.fromMillisecondsSinceEpoch(json['lastCorrectAt'] as int),
+          : DateTime.fromMillisecondsSinceEpoch(asInt(json['lastCorrectAt'])),
       easiness: (json['easiness'] as num?)?.toDouble() ?? 2.5,
-      intervalDays: json['intervalDays'] as int? ?? 0,
-      repetition: json['repetition'] as int? ?? 0,
+      intervalDays: asInt(json['intervalDays']),
+      repetition: asInt(json['repetition']),
     );
   }
 

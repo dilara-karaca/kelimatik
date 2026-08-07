@@ -5,6 +5,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/word_pair.dart';
+import '../navigation/soft_transitions.dart';
 import '../navigation/study_navigation.dart';
 import '../providers/catalog_providers.dart';
 import '../widgets/playful_background.dart';
@@ -190,12 +191,9 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                               .toggle(word.id),
                         ),
                         onTap: () {
-                          Navigator.push(
+                          pushSoft(
                             context,
-                            MaterialPageRoute<void>(
-                              builder: (_) =>
-                                  WordDetailScreen(wordId: word.id),
-                            ),
+                            WordDetailScreen(wordId: word.id),
                           );
                         },
                       ),

@@ -5,6 +5,7 @@ import '../../domain/models/study_mode.dart';
 import '../providers/lives_provider.dart';
 import '../providers/quiz_provider.dart';
 import '../screens/quiz_screen.dart';
+import 'soft_transitions.dart';
 
 Future<void> openStudySession(
   BuildContext context,
@@ -24,8 +25,6 @@ Future<void> openStudySession(
   await ref.read(quizProvider.notifier).startSession(config);
   if (!context.mounted) return;
 
-  await Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => const QuizScreen()),
-  );
+  await pushSoft(context, const QuizScreen());
   ref.read(livesProvider.notifier).refresh();
 }

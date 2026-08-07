@@ -34,30 +34,45 @@ class MistakesRepositoryImpl implements MistakesRepository {
 
   final MistakesLocalDataSource _dataSource;
 
+  /// Serializes read-modify-write so concurrent wrong/correct answers
+  /// cannot overwrite each other via SharedPreferences.
+  Future<void> _writeChain = Future<void>.value();
+
+  Future<T> _enqueue<T>(Future<T> Function() action) {
+    final result = _writeChain.then((_) => action());
+    _writeChain = result.then<void>((_) {}, onError: (_) {});
+    return result;
+  }
+
   @override
   List<MistakeEntry> loadAll() => _dataSource.load();
 
   @override
-  Future<void> saveAll(List<MistakeEntry> entries) => _dataSource.save(entries);
+  Future<void> saveAll(List<MistakeEntry> entries) =>
+      _enqueue(() => _dataSource.save(entries));
 
   @override
-  Future<void> recordWrong(int wordId) async {
-    final entries = loadAll();
-    final index = entries.indexWhere((e) => e.wordId == wordId);
-    if (index < 0) {
-      entries.add(MistakeEntry.firstMiss(wordId));
-    } else {
-      entries[index] = entries[index].recordWrong();
-    }
-    await saveAll(entries);
+  Future<void> recordWrong(int wordId) {
+    return _enqueue(() async {
+      final entries = List<MistakeEntry>.from(loadAll());
+      final index = entries.indexWhere((e) => e.wordId == wordId);
+      if (index < 0) {
+        entries.add(MistakeEntry.firstMiss(wordId));
+      } else {
+        entries[index] = entries[index].recordWrong();
+      }
+      await _dataSource.save(entries);
+    });
   }
 
   @override
-  Future<void> recordCorrect(int wordId) async {
-    final entries = loadAll();
-    final index = entries.indexWhere((e) => e.wordId == wordId);
-    if (index < 0) return;
-    entries[index] = entries[index].recordCorrect();
-    await saveAll(entries);
+  Future<void> recordCorrect(int wordId) {
+    return _enqueue(() async {
+      final entries = List<MistakeEntry>.from(loadAll());
+      final index = entries.indexWhere((e) => e.wordId == wordId);
+      if (index < 0) return;
+      entries[index] = entries[index].recordCorrect();
+      await _dataSource.save(entries);
+    });
   }
 }

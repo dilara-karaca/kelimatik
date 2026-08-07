@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/study_mode.dart';
+import '../navigation/soft_transitions.dart';
 import '../navigation/study_navigation.dart';
 import '../providers/catalog_providers.dart';
 import '../providers/lives_provider.dart';
@@ -19,7 +20,7 @@ class HomeScreen extends ConsumerWidget {
   final bool embedded;
 
   void _open(BuildContext context, Widget page) {
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+    pushSoft(context, page);
   }
 
   void _goTab(WidgetRef ref, int index) {

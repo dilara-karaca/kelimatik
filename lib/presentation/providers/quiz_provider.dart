@@ -223,10 +223,13 @@ class QuizNotifier extends Notifier<QuizState> {
   List<WordPair> _resolveWordPool(List<WordPair> all) {
     switch (_config.mode) {
       case StudyMode.mistakes:
+        // Refresh from disk; drop orphan IDs left after words.json renumbers.
+        ref.read(mistakesProvider.notifier).reload();
+        final knownIds = all.map((w) => w.id).toSet();
         final ids = ref
-            .read(mistakesRepositoryProvider)
-            .loadAll()
+            .read(mistakesProvider)
             .map((e) => e.wordId)
+            .where(knownIds.contains)
             .toSet();
         return all.where((w) => ids.contains(w.id)).toList();
       case StudyMode.favorites:
@@ -288,7 +291,7 @@ class QuizNotifier extends Notifier<QuizState> {
       );
       unawaited(ref.read(statsProvider.notifier).recordCorrect());
       if (_config.recordMistakes) {
-        unawaited(ref.read(mistakesProvider.notifier).recordCorrect(wordId));
+        await ref.read(mistakesProvider.notifier).recordCorrect(wordId);
       }
       if (_config.mode == StudyMode.streak) {
         unawaited(ref.read(bestStreakProvider.notifier).consider(nextStreak));
@@ -316,7 +319,8 @@ class QuizNotifier extends Notifier<QuizState> {
     );
     unawaited(ref.read(statsProvider.notifier).recordWrong());
     if (_config.recordMistakes) {
-      unawaited(ref.read(mistakesProvider.notifier).recordWrong(wordId));
+      // Await so Yanlışlarım sees the entry even if the user leaves quickly.
+      await ref.read(mistakesProvider.notifier).recordWrong(wordId);
     }
 
     if (_config.endOnFirstWrong) {

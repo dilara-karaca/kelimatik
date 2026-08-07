@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/word_pair.dart';
+import '../navigation/soft_transitions.dart';
 import '../providers/catalog_providers.dart';
 import '../widgets/playful_background.dart';
 import 'word_detail_screen.dart';
@@ -152,11 +153,7 @@ class _WordTile extends ConsumerWidget {
           ),
         ),
         onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => WordDetailScreen(wordId: word.id),
-            ),
-          );
+          pushSoft(context, WordDetailScreen(wordId: word.id));
         },
       ),
     );

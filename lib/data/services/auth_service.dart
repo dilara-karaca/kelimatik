@@ -163,6 +163,10 @@ class AuthService {
 
   String _mapSupabaseAuthError(AuthException error) {
     final message = error.message.toLowerCase();
+    if (_looksLikeHostLookupFailure(message)) {
+      return 'Supabase sunucusuna ulaşılamadı. '
+          '.env içindeki SUPABASE_URL değerini kontrol et.';
+    }
     if (message.contains('network') || message.contains('socket')) {
       return 'İnternet bağlantını kontrol edip tekrar dene.';
     }
@@ -174,11 +178,21 @@ class AuthService {
 
   String _mapError(Object error) {
     final text = error.toString().toLowerCase();
-    if (text.contains('network') ||
-        text.contains('socket') ||
-        text.contains('failed host lookup')) {
+    if (_looksLikeHostLookupFailure(text)) {
+      return 'Supabase sunucusuna ulaşılamadı. '
+          '.env içindeki SUPABASE_URL değerini kontrol et.';
+    }
+    if (text.contains('network') || text.contains('socket')) {
       return 'İnternet bağlantını kontrol edip tekrar dene.';
     }
     return 'Beklenmeyen bir hata oluştu. Lütfen tekrar dene.';
+  }
+
+  bool _looksLikeHostLookupFailure(String text) {
+    return text.contains('failed host lookup') ||
+        text.contains('nodename nor servname') ||
+        text.contains('name not resolved') ||
+        text.contains('no address associated') ||
+        text.contains('nxdomain');
   }
 }
