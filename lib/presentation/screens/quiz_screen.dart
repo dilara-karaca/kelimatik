@@ -8,7 +8,9 @@ import '../../domain/models/study_mode.dart';
 import '../providers/catalog_providers.dart';
 import '../providers/lives_provider.dart';
 import '../providers/quiz_provider.dart';
+import '../widgets/favorite_toggle_icon.dart';
 import '../widgets/lives_hearts.dart';
+import '../widgets/motion/motion.dart';
 import '../widgets/out_of_lives_panel.dart';
 import '../widgets/playful_background.dart';
 import '../widgets/progress_footer.dart';
@@ -35,27 +37,31 @@ class QuizScreen extends ConsumerWidget {
                 child: _buildBody(context, ref, quiz, lives.current),
               ),
               if (quiz.showOutOfLivesPanel)
-                OutOfLivesPanel(
-                  nextLifeLabel: lives.nextLifeCountdownLabel,
-                  onRestart: () {
-                    ref.read(quizProvider.notifier).acknowledgeOutOfLives();
-                    Navigator.of(context).pop();
-                  },
+                Positioned.fill(
+                  child: OutOfLivesPanel(
+                    nextLifeLabel: lives.nextLifeCountdownLabel,
+                    onRestart: () {
+                      ref.read(quizProvider.notifier).acknowledgeOutOfLives();
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 ),
               if (quiz.showResult && quiz.result != null)
-                SessionResultPanel(
-                  result: quiz.result!,
-                  onClose: () {
-                    ref.read(quizProvider.notifier).acknowledgeResult();
-                    Navigator.of(context).pop();
-                  },
-                  onRetry: quiz.result!.mode == StudyMode.favorites
-                      ? () {
-                          ref.read(quizProvider.notifier).startSession(
-                                QuizSessionConfig.favorites(),
-                              );
-                        }
-                      : null,
+                Positioned.fill(
+                  child: SessionResultPanel(
+                    result: quiz.result!,
+                    onClose: () {
+                      ref.read(quizProvider.notifier).acknowledgeResult();
+                      Navigator.of(context).pop();
+                    },
+                    onRetry: quiz.result!.mode == StudyMode.favorites
+                        ? () {
+                            ref.read(quizProvider.notifier).startSession(
+                                  QuizSessionConfig.favorites(),
+                                );
+                          }
+                        : null,
+                  ),
                 ),
             ],
           ),
@@ -217,10 +223,7 @@ class _QuizContent extends ConsumerWidget {
                 );
               },
               tooltip: isFavorite ? 'Favorilerden çıkar' : 'Favorilere ekle',
-              icon: Icon(
-                isFavorite ? Icons.star_rounded : Icons.star_border_rounded,
-                color: isFavorite ? AppColors.accent : AppColors.textPrimary,
-              ),
+              icon: FavoriteToggleIcon(favorited: isFavorite, size: 24),
             ),
           ],
         ),
@@ -246,7 +249,19 @@ class _QuizContent extends ConsumerWidget {
         const SizedBox(height: 14),
         Expanded(
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 220),
+            duration: AppConstants.cardSwap,
+            switchInCurve: AppConstants.pageCurve,
+            switchOutCurve: AppConstants.pageReverseCurve,
+            transitionBuilder: softFadeSlideTransition,
+            layoutBuilder: (currentChild, previousChildren) {
+              return Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  ...previousChildren,
+                  if (currentChild != null) currentChild,
+                ],
+              );
+            },
             child: Column(
               key: ValueKey('${question.wordPair.id}-${quiz.answeredInDeck}'),
               children: [

@@ -149,6 +149,8 @@ class CurrentProfileNotifier extends Notifier<ProfileState> {
     String? username,
     String? displayName,
     String? avatarUrl,
+    String? selectedCharacter,
+    bool? onboardingCompleted,
     int? xp,
     int? level,
     int? correctCount,
@@ -160,6 +162,8 @@ class CurrentProfileNotifier extends Notifier<ProfileState> {
         username: username,
         displayName: displayName,
         avatarUrl: avatarUrl,
+        selectedCharacter: selectedCharacter,
+        onboardingCompleted: onboardingCompleted,
         xp: xp,
         level: level,
         correctCount: correctCount,
@@ -177,6 +181,39 @@ class CurrentProfileNotifier extends Notifier<ProfileState> {
         status: ProfileLoadStatus.error,
         errorMessage: 'Profil güncellenemedi. Lütfen tekrar dene.',
       );
+    }
+  }
+
+  /// Completes character + username onboarding without leaving AuthGate ready.
+  ///
+  /// Returns an error message on failure; null on success.
+  Future<String?> completeOnboarding({
+    required String username,
+    required String selectedCharacter,
+  }) async {
+    try {
+      final available = await _service.isUsernameAvailable(username);
+      if (!available) {
+        return 'Bu kullanıcı adı zaten kullanılıyor.';
+      }
+      await _service.updateProfile(
+        username: username,
+        selectedCharacter: selectedCharacter,
+        onboardingCompleted: true,
+      );
+      final profile = await _service.refreshProfile();
+      if (profile == null) {
+        return 'Profil güncellenemedi. Lütfen tekrar dene.';
+      }
+      state = ProfileState(
+        status: ProfileLoadStatus.ready,
+        profile: profile,
+      );
+      return null;
+    } on ProfileFailure catch (failure) {
+      return failure.message;
+    } catch (_) {
+      return 'Profil güncellenemedi. Lütfen tekrar dene.';
     }
   }
 

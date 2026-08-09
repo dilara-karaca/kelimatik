@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
+import 'app_icon.dart';
+import 'motion/motion.dart';
 
 class ScoreHeader extends StatelessWidget {
   const ScoreHeader({
@@ -19,6 +22,7 @@ class ScoreHeader extends StatelessWidget {
       children: [
         Expanded(
           child: _ScoreChip(
+            icon: AppIcons.correct,
             label: 'Doğru',
             value: correctCount,
             accent: AppColors.correct,
@@ -28,6 +32,7 @@ class ScoreHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: _ScoreChip(
+            icon: AppIcons.wrong,
             label: 'Yanlış',
             value: wrongCount,
             accent: AppColors.wrong,
@@ -41,12 +46,14 @@ class ScoreHeader extends StatelessWidget {
 
 class _ScoreChip extends StatelessWidget {
   const _ScoreChip({
+    required this.icon,
     required this.label,
     required this.value,
     required this.accent,
     required this.soft,
   });
 
+  final String icon;
   final String label;
   final int value;
   final Color accent;
@@ -63,6 +70,8 @@ class _ScoreChip extends StatelessWidget {
       ),
       child: Row(
         children: [
+          AppIcon(icon, size: 18),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               label,
@@ -70,7 +79,10 @@ class _ScoreChip extends StatelessWidget {
             ),
           ),
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
+            duration: AppConstants.cardSwap,
+            switchInCurve: AppConstants.pageCurve,
+            switchOutCurve: AppConstants.pageReverseCurve,
+            transitionBuilder: softFadeSlideTransition,
             child: Text(
               '$value',
               key: ValueKey(value),

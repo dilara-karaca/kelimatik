@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/study_mode.dart';
 import '../navigation/soft_transitions.dart';
 import '../navigation/study_navigation.dart';
+import 'app_icon.dart';
+import 'motion/motion.dart';
 
 Future<void> showChallengePresetsSheet(
   BuildContext context,
@@ -64,12 +67,15 @@ class _ChallengePresetsSheet extends StatelessWidget {
                 style: AppTypography.title(fontSize: 13),
               ),
               const SizedBox(height: 16),
-              ...ChallengePresets.packages.map((package) {
+              ...ChallengePresets.packages.asMap().entries.map((entry) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: _PackageTile(
-                    package: package,
-                    onTap: () => onSelect(package),
+                  child: FadeSlideIn(
+                    delay: AppConstants.entranceStagger * entry.key,
+                    child: _PackageTile(
+                      package: entry.value,
+                      onTap: () => onSelect(entry.value),
+                    ),
                   ),
                 );
               }),
@@ -90,70 +96,70 @@ class _PackageTile extends StatelessWidget {
   final ChallengePackage package;
   final VoidCallback onTap;
 
-  IconData _iconFor(String id) {
+  String _iconFor(String id) {
     return switch (id) {
-      'hizli' => Icons.flash_on_rounded,
-      'standart' => Icons.timer_outlined,
-      'sprint' => Icons.directions_run_rounded,
-      'maraton' => Icons.emoji_events_outlined,
-      _ => Icons.bolt_rounded,
+      'hizli' => AppIcons.challengeMode,
+      'standart' => AppIcons.timer,
+      'sprint' => AppIcons.timerLive,
+      'maraton' => AppIcons.league,
+      _ => AppIcons.challengeMode,
     };
   }
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.surface,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        onTap: onTap,
+    return AnimatedPressable(
+      child: Material(
+        color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.divider),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(18),
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: AppColors.divider),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: AppColors.accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Center(
+                    child: AppIcon(_iconFor(package.id), size: 22),
+                  ),
                 ),
-                child: Icon(
-                  _iconFor(package.id),
-                  color: AppColors.accentDeep,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      package.title,
-                      style: AppTypography.body(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        package.title,
+                        style: AppTypography.body(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      package.subtitle,
-                      style: AppTypography.title(fontSize: 12),
-                    ),
-                  ],
+                      const SizedBox(height: 2),
+                      Text(
+                        package.subtitle,
+                        style: AppTypography.title(fontSize: 12),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.textSecondary.withValues(alpha: 0.5),
-              ),
-            ],
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textSecondary.withValues(alpha: 0.5),
+                ),
+              ],
+            ),
           ),
         ),
       ),

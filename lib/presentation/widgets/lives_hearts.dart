@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
+import 'app_icon.dart';
 
 class LivesHearts extends StatelessWidget {
   const LivesHearts({
@@ -14,6 +16,10 @@ class LivesHearts extends StatelessWidget {
   final double size;
   final double spacing;
 
+  /// bos_can fills ~90% of its canvas; dolu_can ~53%. Scale empty down so
+  /// both hearts look the same size inside the same slot.
+  static const double _emptyVisualScale = 0.58;
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -21,16 +27,17 @@ class LivesHearts extends StatelessWidget {
       children: List.generate(AppConstants.maxLives, (index) {
         final alive = index < current;
         return Padding(
-          padding: EdgeInsets.only(right: index == AppConstants.maxLives - 1 ? 0 : spacing),
-          child: AnimatedScale(
-            scale: alive ? 1 : 0.92,
-            duration: const Duration(milliseconds: 180),
-            child: Icon(
-              alive ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-              size: size,
-              color: alive
-                  ? AppColors.wrong
-                  : AppColors.wrong.withValues(alpha: 0.28),
+          padding: EdgeInsets.only(
+            right: index == AppConstants.maxLives - 1 ? 0 : spacing,
+          ),
+          child: SizedBox(
+            width: size,
+            height: size,
+            child: Center(
+              child: AppIcon(
+                alive ? AppIcons.lifeFull : AppIcons.lifeEmpty,
+                size: alive ? size : size * _emptyVisualScale,
+              ),
             ),
           ),
         );

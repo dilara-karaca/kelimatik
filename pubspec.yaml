@@ -66,3 +66,38 @@ flutter:
   assets:
     - .env
     - assets/data/
+    - assets/icons/arama.png
+    - assets/icons/ayarlar.png
+    - assets/icons/bildirim.png
+    - assets/icons/bilgi.png
+    - assets/icons/bos_can.png
+    - assets/icons/can_kalmadi.png
+    - assets/icons/challenge_mod.png
+    - assets/icons/dogru.png
+    - assets/icons/dolu_can.png
+    - assets/icons/favorile.png
+    - assets/icons/favorilendi.png
+    - assets/icons/favorilerim.png
+    - assets/icons/home.png
+    - assets/icons/klasik_mod.png
+    - assets/icons/kullanici.png
+    - assets/icons/lig.png
+    - assets/icons/paylas.png
+    - assets/icons/saat.png
+    - assets/icons/saat_canli.png
+    - assets/icons/seri_mod.png
+    - assets/icons/sonsuz_mod.png
+    - assets/icons/streak-devam.png
+    - assets/icons/streak_olu.png
+    - assets/icons/yanlis.png
+    - assets/icons/yanlislarim.png
+    - assets/characters/erkek1.png
+    - assets/characters/erkek2.png
+    - assets/characters/erkek3.png
+    - assets/characters/erkek4.png
+    - assets/characters/erkek5.png
+    - assets/characters/kadin1.png
+    - assets/characters/kadin2.png
+    - assets/characters/kadin3.png
+    - assets/characters/kadin4.png
+    - assets/characters/kadin5.png

@@ -23,15 +23,15 @@ Widget buildSoftPageTransition({
     opacity: Tween<double>(begin: 0, end: 1).animate(incoming),
     child: SlideTransition(
       position: Tween<Offset>(
-        begin: const Offset(0, 0.04),
+        begin: const Offset(0, 0.03),
         end: Offset.zero,
       ).animate(incoming),
       child: FadeTransition(
-        opacity: Tween<double>(begin: 1, end: 0.88).animate(outgoing),
+        opacity: Tween<double>(begin: 1, end: 0.92).animate(outgoing),
         child: SlideTransition(
           position: Tween<Offset>(
             begin: Offset.zero,
-            end: const Offset(0, -0.015),
+            end: const Offset(0, -0.012),
           ).animate(outgoing),
           child: child,
         ),

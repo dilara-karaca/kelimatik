@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/word_pair.dart';
 import '../navigation/soft_transitions.dart';
 import '../navigation/study_navigation.dart';
 import '../providers/catalog_providers.dart';
+import '../widgets/app_icon.dart';
+import '../widgets/favorite_toggle_icon.dart';
+import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
 import 'word_detail_screen.dart';
 
@@ -103,7 +107,10 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                                 width: 1.5,
                               ),
                             ),
-                            prefixIcon: const Icon(Icons.search_rounded),
+                            prefixIcon: const Padding(
+                              padding: EdgeInsets.all(12),
+                              child: AppIcon(AppIcons.search, size: 22),
+                            ),
                           ),
                         )
                       : Text(
@@ -114,10 +121,12 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                 IconButton(
                   onPressed: _toggleSearch,
                   tooltip: _searchOpen ? 'Aramayı kapat' : 'Ara',
-                  icon: Icon(
-                    _searchOpen ? Icons.close_rounded : Icons.search_rounded,
-                    color: AppColors.textPrimary,
-                  ),
+                  icon: _searchOpen
+                      ? const Icon(
+                          Icons.close_rounded,
+                          color: AppColors.textPrimary,
+                        )
+                      : const AppIcon(AppIcons.search, size: 24),
                 ),
                 if (favIds.isNotEmpty && !_searchOpen)
                   TextButton(
@@ -162,40 +171,46 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final word = list[index];
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceElevated,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.divider),
-                      ),
-                      child: ListTile(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        title: Text(
-                          word.correct,
-                          style:
-                              AppTypography.body(fontWeight: FontWeight.w700),
-                        ),
-                        subtitle: Text(
-                          word.wrong,
-                          style: AppTypography.title(fontSize: 12),
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(
-                            Icons.star_rounded,
-                            color: AppColors.accent,
+                    return SoftListAppear(
+                      index: index,
+                      child: AnimatedPressable(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceElevated,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: AppColors.divider),
                           ),
-                          onPressed: () => ref
-                              .read(favoritesProvider.notifier)
-                              .toggle(word.id),
+                          child: ListTile(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            title: Text(
+                              word.correct,
+                              style: AppTypography.body(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            subtitle: Text(
+                              word.wrong,
+                              style: AppTypography.title(fontSize: 12),
+                            ),
+                            trailing: IconButton(
+                              icon: const FavoriteToggleIcon(
+                                favorited: true,
+                                size: 24,
+                              ),
+                              onPressed: () => ref
+                                  .read(favoritesProvider.notifier)
+                                  .toggle(word.id),
+                            ),
+                            onTap: () {
+                              pushSoft(
+                                context,
+                                WordDetailScreen(wordId: word.id),
+                              );
+                            },
+                          ),
                         ),
-                        onTap: () {
-                          pushSoft(
-                            context,
-                            WordDetailScreen(wordId: word.id),
-                          );
-                        },
                       ),
                     );
                   },

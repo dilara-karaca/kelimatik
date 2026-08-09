@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app.dart';
 import 'core/config/supabase_bootstrap.dart';
+import 'core/constants/app_constants.dart';
 import 'presentation/providers/dependency_providers.dart';
 
 Future<void> main() async {
@@ -21,7 +22,7 @@ Future<void> main() async {
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
-      systemNavigationBarColor: Color(0xFFFFF8F1),
+      systemNavigationBarColor: AppColors.white,
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );

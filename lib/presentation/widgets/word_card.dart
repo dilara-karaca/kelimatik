@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
+import 'app_icon.dart';
 
 enum WordCardVisualState { idle, correct, wrong, dimmed }
 
@@ -33,31 +35,32 @@ class _WordCardState extends State<WordCard> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    // Stay inside feedback windows (correct 500ms / wrong 1000ms).
     _bounceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 420),
+      duration: const Duration(milliseconds: 380),
     );
     _shakeController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 420),
+      duration: const Duration(milliseconds: 360),
     );
 
-    // Avoid Curves.easeOutBack here — it overshoots outside [0,1] and
-    // TweenSequence asserts (red error flash), especially on rapid taps.
+    // Avoid Curves.easeOutBack — overshoot outside [0,1] breaks TweenSequence.
     _bounce = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1, end: 1.07), weight: 45),
-      TweenSequenceItem(tween: Tween(begin: 1.07, end: 0.98), weight: 30),
-      TweenSequenceItem(tween: Tween(begin: 0.98, end: 1), weight: 25),
+      TweenSequenceItem(tween: Tween(begin: 1, end: 1.05), weight: 45),
+      TweenSequenceItem(tween: Tween(begin: 1.05, end: 0.99), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 0.99, end: 1), weight: 25),
     ]).animate(
       CurvedAnimation(parent: _bounceController, curve: Curves.easeOutCubic),
     );
 
+    // Subtle shake — enough feedback without shaking the screen.
     _shake = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0, end: -8), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: -8, end: 8), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 8, end: -6), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: -6, end: 4), weight: 2),
-      TweenSequenceItem(tween: Tween(begin: 4, end: 0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 0, end: -4), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -4, end: 4), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 4, end: -3), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: -3, end: 2), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 2, end: 0), weight: 1),
     ]).animate(
       CurvedAnimation(parent: _shakeController, curve: Curves.easeInOut),
     );
@@ -139,12 +142,12 @@ class _WordCardState extends State<WordCard> with TickerProviderStateMixin {
     }
   }
 
-  IconData? get _badgeIcon {
+  String? get _badgeAsset {
     switch (widget.visualState) {
       case WordCardVisualState.correct:
-        return Icons.check_rounded;
+        return AppIcons.correct;
       case WordCardVisualState.wrong:
-        return Icons.close_rounded;
+        return AppIcons.wrong;
       default:
         return null;
     }
@@ -152,8 +155,6 @@ class _WordCardState extends State<WordCard> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final pressScale = _pressed ? 0.95 : 1.0;
-
     return AbsorbPointer(
       absorbing: !widget.enabled,
       child: AnimatedBuilder(
@@ -171,59 +172,78 @@ class _WordCardState extends State<WordCard> with TickerProviderStateMixin {
               0,
             ),
             child: Transform.scale(
-              scale: pressScale * feedbackScale,
+              scale: feedbackScale,
               child: child,
             ),
           );
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-          decoration: BoxDecoration(
-            color: _fill,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: _borderColor, width: 1.5),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(20),
-            child: InkWell(
-              onTap: _handleTap,
-              onTapDown: (_) => _setPressed(true),
-              onTapUp: (_) => _setPressed(false),
-              onTapCancel: () => _setPressed(false),
-              borderRadius: BorderRadius.circular(20),
-              splashColor: AppColors.accent.withValues(alpha: 0.08),
-              highlightColor: AppColors.accent.withValues(alpha: 0.04),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 14,
-                    right: 16,
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 180),
-                      opacity: _badgeIcon == null ? 0 : 1,
-                      child: Icon(
-                        _badgeIcon ?? Icons.circle,
-                        color: _textColor,
-                        size: 22,
-                      ),
-                    ),
-                  ),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 22),
-                      child: AnimatedDefaultTextStyle(
-                        duration: const Duration(milliseconds: 200),
-                        style: AppTypography.word(color: _textColor),
-                        child: Text(
-                          widget.text,
-                          textAlign: TextAlign.center,
+        child: AnimatedScale(
+          scale: _pressed ? AppConstants.pressScale : 1,
+          duration: _pressed
+              ? AppConstants.pressInDuration
+              : AppConstants.pressOutDuration,
+          curve: _pressed
+              ? AppConstants.pressInCurve
+              : AppConstants.pressOutCurve,
+          child: AnimatedOpacity(
+            opacity: _pressed ? AppConstants.pressOpacity : 1,
+            duration: _pressed
+                ? AppConstants.pressInDuration
+                : AppConstants.pressOutDuration,
+            child: AnimatedContainer(
+              duration: AppConstants.cardSwap,
+              curve: Curves.easeOut,
+              decoration: BoxDecoration(
+                color: _fill,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: _borderColor, width: 1.5),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                borderRadius: BorderRadius.circular(20),
+                child: InkWell(
+                  onTap: _handleTap,
+                  onTapDown: (_) => _setPressed(true),
+                  onTapUp: (_) => _setPressed(false),
+                  onTapCancel: () => _setPressed(false),
+                  borderRadius: BorderRadius.circular(20),
+                  splashColor: AppColors.accent.withValues(alpha: 0.08),
+                  highlightColor: AppColors.accent.withValues(alpha: 0.04),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 14,
+                        right: 16,
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 160),
+                          opacity: _badgeAsset == null ? 0 : 1,
+                          child: AnimatedScale(
+                            scale: _badgeAsset == null ? 0.6 : 1,
+                            duration: const Duration(milliseconds: 200),
+                            curve: Curves.easeOutCubic,
+                            child: AppIcon(
+                              _badgeAsset ?? AppIcons.correct,
+                              size: 22,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 22),
+                          child: AnimatedDefaultTextStyle(
+                            duration: AppConstants.cardSwap,
+                            style: AppTypography.word(color: _textColor),
+                            child: Text(
+                              widget.text,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),

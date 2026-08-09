@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
+import 'app_icon.dart';
+import 'motion/motion.dart';
 
 class OutOfLivesPanel extends StatelessWidget {
   const OutOfLivesPanel({
@@ -17,140 +20,88 @@ class OutOfLivesPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.black.withValues(alpha: 0.45),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(28),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.textPrimary.withValues(alpha: 0.12),
-                    blurRadius: 32,
-                    offset: const Offset(0, 16),
-                    spreadRadius: -4,
-                  ),
-                ],
+    return SoftOverlayAppear(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: AppColors.surfaceElevated,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.textPrimary.withValues(alpha: 0.12),
+                blurRadius: 32,
+                offset: const Offset(0, 16),
+                spreadRadius: -4,
               ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(22, 28, 22, 18),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const _HeartHero(),
-                    const SizedBox(height: 18),
-                    Text(
-                      'Canların tükendi',
-                      style: AppTypography.brand(fontSize: 24),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Kısa bir mola verebilir veya can yenileyerek devam edebilirsin.',
-                      style: AppTypography.title(fontSize: 13).copyWith(
-                        height: 1.4,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 20),
-                    _RegenStatusChip(
-                      isReady: _isReady,
-                      countdown: nextLifeLabel,
-                    ),
-                    const SizedBox(height: 20),
-                    _PanelButton(
-                      label: 'Reklam izle · 1 can kazan',
-                      icon: Icons.play_circle_filled_rounded,
-                      background: AppColors.accent,
-                      foreground: Colors.white,
-                      onPressed: null,
-                    ),
-                    const SizedBox(height: 10),
-                    _PanelButton(
-                      label: 'Sınırsız can · Premium',
-                      icon: Icons.workspace_premium_rounded,
-                      background: AppColors.wrongSoft,
-                      foreground: AppColors.textPrimary,
-                      onPressed: null,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Reklam ve Premium yakında',
-                      style: AppTypography.title(fontSize: 11),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton.icon(
-                      onPressed: onRestart,
-                      icon: Icon(
-                        Icons.home_outlined,
-                        size: 18,
-                        color: AppColors.textSecondary,
-                      ),
-                      label: Text(
-                        'Ana sayfaya dön',
-                        style: AppTypography.body(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(22, 28, 22, 18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const AppIcon(AppIcons.lifeGone, size: 72),
+                const SizedBox(height: 18),
+                Text(
+                  'Canların Tükendi',
+                  style: AppTypography.brand(fontSize: 24),
+                  textAlign: TextAlign.center,
                 ),
-              ),
+                const SizedBox(height: 8),
+                Text(
+                  'Kısa bir mola verebilir veya can yenileyerek devam edebilirsin.',
+                  style: AppTypography.title(fontSize: 13).copyWith(
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                _RegenStatusChip(
+                  isReady: _isReady,
+                  countdown: nextLifeLabel,
+                ),
+                const SizedBox(height: 20),
+                _PanelButton(
+                  label: 'Reklam izle · 1 can kazan',
+                  icon: Icons.play_circle_filled_rounded,
+                  background: AppColors.accent,
+                  foreground: Colors.white,
+                  onPressed: null,
+                ),
+                const SizedBox(height: 10),
+                _PanelButton(
+                  label: 'Sınırsız can · Premium',
+                  icon: Icons.workspace_premium_rounded,
+                  background: AppColors.wrongSoft,
+                  foreground: AppColors.textPrimary,
+                  onPressed: null,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Reklam ve Premium yakında',
+                  style: AppTypography.title(fontSize: 11),
+                ),
+                const SizedBox(height: 8),
+                AnimatedPressable(
+                  child: TextButton.icon(
+                    onPressed: onRestart,
+                    icon: const AppIcon(AppIcons.home, size: 18),
+                    label: Text(
+                      'Ana sayfaya dön',
+                      style: AppTypography.body(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _HeartHero extends StatelessWidget {
-  const _HeartHero();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 96,
-      height: 88,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            left: 8,
-            top: 10,
-            child: Icon(
-              Icons.close_rounded,
-              size: 14,
-              color: AppColors.wrong.withValues(alpha: 0.35),
-            ),
-          ),
-          Positioned(
-            right: 10,
-            top: 18,
-            child: Icon(
-              Icons.close_rounded,
-              size: 12,
-              color: AppColors.wrong.withValues(alpha: 0.28),
-            ),
-          ),
-          Icon(
-            Icons.favorite_rounded,
-            size: 72,
-            color: AppColors.wrong.withValues(alpha: 0.92),
-          ),
-          const Icon(
-            Icons.bolt_rounded,
-            size: 30,
-            color: Colors.white,
-          ),
-        ],
       ),
     );
   }
@@ -188,11 +139,7 @@ class _RegenStatusChip extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.schedule_rounded,
-                size: 18,
-                color: AppColors.wrong,
-              ),
+              const AppIcon(AppIcons.timer, size: 18),
               const SizedBox(width: 6),
               Text(
                 isReady ? 'Hazır!' : countdown,
@@ -231,25 +178,28 @@ class _PanelButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: 52,
-      child: FilledButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 22),
-        label: Text(
-          label,
-          style: AppTypography.body(
-            color: enabled ? foreground : foreground.withValues(alpha: 0.55),
-            fontWeight: FontWeight.w700,
-            fontSize: 14,
+      child: AnimatedPressable(
+        enabled: enabled,
+        child: FilledButton.icon(
+          onPressed: onPressed,
+          icon: Icon(icon, size: 22),
+          label: Text(
+            label,
+            style: AppTypography.body(
+              color: enabled ? foreground : foreground.withValues(alpha: 0.55),
+              fontWeight: FontWeight.w700,
+              fontSize: 14,
+            ),
           ),
-        ),
-        style: FilledButton.styleFrom(
-          backgroundColor: background,
-          foregroundColor: foreground,
-          disabledBackgroundColor: background.withValues(alpha: 0.55),
-          disabledForegroundColor: foreground.withValues(alpha: 0.55),
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(999),
+          style: FilledButton.styleFrom(
+            backgroundColor: background,
+            foregroundColor: foreground,
+            disabledBackgroundColor: background.withValues(alpha: 0.55),
+            disabledForegroundColor: foreground.withValues(alpha: 0.55),
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(999),
+            ),
           ),
         ),
       ),

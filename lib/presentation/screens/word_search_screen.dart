@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/word_pair.dart';
 import '../navigation/soft_transitions.dart';
 import '../providers/catalog_providers.dart';
+import '../widgets/app_icon.dart';
+import '../widgets/favorite_toggle_icon.dart';
+import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
 import 'word_detail_screen.dart';
 
@@ -43,11 +47,6 @@ class _WordSearchScreenState extends ConsumerState<WordSearchScreen> {
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.arrow_back_rounded),
-                  )
-                else
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: Text('Ara', style: AppTypography.brand(fontSize: 24)),
                   ),
                 Expanded(
                   child: TextField(
@@ -55,7 +54,7 @@ class _WordSearchScreenState extends ConsumerState<WordSearchScreen> {
                     autofocus: !widget.embedded,
                     onChanged: (v) => setState(() => _query = v.trim()),
                     decoration: InputDecoration(
-                      hintText: 'Doğru yazımı ara...',
+                      hintText: 'Kelime ara...',
                       filled: true,
                       fillColor: AppColors.surfaceElevated,
                       border: OutlineInputBorder(
@@ -73,7 +72,10 @@ class _WordSearchScreenState extends ConsumerState<WordSearchScreen> {
                           width: 1.5,
                         ),
                       ),
-                      prefixIcon: const Icon(Icons.search_rounded),
+                      prefixIcon: const Padding(
+                        padding: EdgeInsets.all(12),
+                        child: AppIcon(AppIcons.search, size: 22),
+                      ),
                     ),
                   ),
                 ),
@@ -102,7 +104,12 @@ class _WordSearchScreenState extends ConsumerState<WordSearchScreen> {
                   itemCount: filtered.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
-                    return _WordTile(word: filtered[index]);
+                    return SoftListAppear(
+                      index: index,
+                      child: AnimatedPressable(
+                        child: _WordTile(word: filtered[index]),
+                      ),
+                    );
                   },
                 );
               },
@@ -147,10 +154,7 @@ class _WordTile extends ConsumerWidget {
           onPressed: () =>
               ref.read(favoritesProvider.notifier).toggle(word.id),
           tooltip: fav ? 'Favorilerden çıkar' : 'Favorilere ekle',
-          icon: Icon(
-            fav ? Icons.star_rounded : Icons.star_border_rounded,
-            color: fav ? AppColors.accent : AppColors.textSecondary,
-          ),
+          icon: FavoriteToggleIcon(favorited: fav, size: 24),
         ),
         onTap: () {
           pushSoft(context, WordDetailScreen(wordId: word.id));

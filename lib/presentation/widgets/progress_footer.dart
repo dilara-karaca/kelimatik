@@ -40,8 +40,8 @@ class ProgressFooter extends StatelessWidget {
                       color: AppColors.progressTrack,
                     ),
                     AnimatedContainer(
-                      duration: const Duration(milliseconds: 280),
-                      curve: Curves.easeOutCubic,
+                      duration: AppConstants.cardSwap,
+                      curve: AppConstants.pageCurve,
                       height: 8,
                       width: constraints.maxWidth * fraction,
                       color: AppColors.accent,

@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/profile/profile_provider.dart';
 import '../providers/auth_provider.dart';
+import '../screens/character_onboarding_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/main_shell_screen.dart';
+import 'app_icon.dart';
 
-/// Google session → profile ensure → home / login.
+/// Google session → profile ensure → onboarding / home / login.
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
 
@@ -22,6 +25,10 @@ class AuthGate extends ConsumerWidget {
       AppAuthStatus.unauthenticated => const LoginScreen(),
       AppAuthStatus.authenticated => () {
           if (profile.isReady) {
+            final p = profile.profile!;
+            if (p.needsOnboarding) {
+              return const CharacterOnboardingScreen();
+            }
             return const MainShellScreen();
           }
           if (profile.status == ProfileLoadStatus.error) {
@@ -36,6 +43,9 @@ class AuthGate extends ConsumerWidget {
           return const _BootScaffold(label: 'Profil hazırlanıyor...');
         }(),
     };
+
+    final onboardingKey =
+        profile.profile?.needsOnboarding == true ? 'need' : 'done';
 
     return AnimatedSwitcher(
       duration: AppConstants.pageTransition,
@@ -56,7 +66,7 @@ class AuthGate extends ConsumerWidget {
       },
       child: KeyedSubtree(
         key: ValueKey<String>(
-          '${auth.status.name}-${profile.status.name}-${profile.isReady}',
+          '${auth.status.name}-${profile.status.name}-${profile.isReady}-$onboardingKey',
         ),
         child: child,
       ),
@@ -116,11 +126,7 @@ class _ProfileErrorScaffold extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.person_off_outlined,
-                size: 48,
-                color: AppColors.accentDeep,
-              ),
+              const AppIcon(AppIcons.profile, size: 48),
               const SizedBox(height: 16),
               Text(
                 'Profil açılamadı',

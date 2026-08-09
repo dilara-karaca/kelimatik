@@ -128,6 +128,8 @@ class ProfileService {
     String? username,
     String? displayName,
     String? avatarUrl,
+    String? selectedCharacter,
+    bool? onboardingCompleted,
     int? xp,
     int? level,
     int? correctCount,
@@ -143,6 +145,12 @@ class ProfileService {
     if (username != null) payload['username'] = username.trim();
     if (displayName != null) payload['display_name'] = displayName.trim();
     if (avatarUrl != null) payload['avatar_url'] = avatarUrl.trim();
+    if (selectedCharacter != null) {
+      payload['selected_character'] = selectedCharacter.trim();
+    }
+    if (onboardingCompleted != null) {
+      payload['onboarding_completed'] = onboardingCompleted;
+    }
     if (xp != null) payload['xp'] = xp;
     if (level != null) payload['level'] = level;
     if (correctCount != null) payload['correct_count'] = correctCount;
@@ -161,6 +169,34 @@ class ProfileService {
       debugPrint('updateProfile failed: $error\n$stack');
       throw ProfileFailure(
         'Profil güncellenemedi. Lütfen tekrar dene.',
+        retryable: _isTransient(error),
+      );
+    }
+  }
+
+  /// True if [username] is free or already owned by the current user.
+  Future<bool> isUsernameAvailable(String username) async {
+    final user = _user;
+    if (user == null) {
+      throw const ProfileFailure('Oturum bulunamadı. Tekrar giriş yap.');
+    }
+
+    try {
+      final row = await _client
+          .from(_table)
+          .select('id')
+          .eq('username', username)
+          .maybeSingle();
+      if (row == null) return true;
+      return row['id'] == user.id;
+    } on PostgrestException catch (error) {
+      throw ProfileFailure(_mapPostgrestError(error));
+    } on AuthException catch (error) {
+      throw ProfileFailure(_mapAuthError(error), retryable: true);
+    } catch (error, stack) {
+      debugPrint('isUsernameAvailable failed: $error\n$stack');
+      throw ProfileFailure(
+        'Kullanıcı adı kontrol edilemedi. Lütfen tekrar dene.',
         retryable: _isTransient(error),
       );
     }
@@ -304,7 +340,7 @@ class ProfileService {
     final message = (error.message).toLowerCase();
 
     if (code == '23505' || message.contains('duplicate')) {
-      return 'Bu kullanıcı adı zaten alınmış. Başka bir ad dene.';
+      return 'Bu kullanıcı adı zaten kullanılıyor.';
     }
     if (code == '42501' ||
         message.contains('permission') ||

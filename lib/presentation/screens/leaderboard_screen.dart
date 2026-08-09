@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_typography.dart';
 import '../providers/catalog_providers.dart';
+import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
 
 class LeaderboardScreen extends ConsumerWidget {
@@ -58,41 +59,46 @@ class LeaderboardScreen extends ConsumerWidget {
                       3 => AppColors.mint,
                       _ => AppColors.textSecondary,
                     };
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: AppColors.surfaceElevated,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: AppColors.divider),
-                      ),
-                      child: ListTile(
-                        shape: RoundedRectangleBorder(
+                    return SoftListAppear(
+                      index: index,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceElevated,
                           borderRadius: BorderRadius.circular(14),
+                          border: Border.all(color: AppColors.divider),
                         ),
-                        leading: Container(
-                          width: 36,
-                          height: 36,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: medal.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(10),
+                        child: ListTile(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                          child: Text(
-                            '${e.rank}',
+                          leading: Container(
+                            width: 36,
+                            height: 36,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: medal.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              '${e.rank}',
+                              style: AppTypography.body(
+                                color: medal,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          title: Text(
+                            e.displayName,
                             style: AppTypography.body(
-                              color: medal,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                        ),
-                        title: Text(
-                          e.displayName,
-                          style: AppTypography.body(fontWeight: FontWeight.w700),
-                        ),
-                        trailing: Text(
-                          '${e.score}',
-                          style: AppTypography.score(
-                            color: AppColors.textPrimary,
-                            fontSize: 18,
+                          trailing: Text(
+                            '${e.score}',
+                            style: AppTypography.score(
+                              color: AppColors.textPrimary,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
                       ),

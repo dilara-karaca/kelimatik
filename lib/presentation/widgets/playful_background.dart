@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants/app_constants.dart';
 
-/// Soft cream–blush backdrop for the playful home UI.
+/// White-first backdrop for the Kelimatik home UI.
 class PlayfulBackground extends StatelessWidget {
   const PlayfulBackground({super.key, required this.child});
 

@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_typography.dart';
 import '../providers/catalog_providers.dart';
+import '../widgets/favorite_toggle_icon.dart';
+import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
 
 class WordDetailScreen extends ConsumerWidget {
@@ -34,54 +36,74 @@ class WordDetailScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back_rounded),
+                    AnimatedPressable(
+                      child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
                     ),
                     const Spacer(),
-                    IconButton(
-                      onPressed: () =>
-                          ref.read(favoritesProvider.notifier).toggle(wordId),
-                      icon: Icon(
-                        fav ? Icons.star_rounded : Icons.star_border_rounded,
-                        color: AppColors.accent,
-                        size: 28,
+                    AnimatedPressable(
+                      child: IconButton(
+                        onPressed: () => ref
+                            .read(favoritesProvider.notifier)
+                            .toggle(wordId),
+                        icon: FavoriteToggleIcon(favorited: fav, size: 28),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
-                Text(word.correct, style: AppTypography.brand(fontSize: 36)),
-                const SizedBox(height: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: AppColors.wrongSoft,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                FadeSlideIn(
                   child: Text(
-                    'Yaygın hata: ${word.wrong}',
-                    style: AppTypography.title(
-                      color: AppColors.wrong,
-                      fontSize: 14,
+                    word.correct,
+                    style: AppTypography.brand(fontSize: 36),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                FadeSlideIn(
+                  delay: AppConstants.entranceStagger,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.wrongSoft,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'Yaygın hata: ${word.wrong}',
+                      style: AppTypography.title(
+                        color: AppColors.wrong,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 28),
-                Text('Örnek kullanım', style: AppTypography.brand(fontSize: 20)),
-                const SizedBox(height: 12),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceElevated,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.divider),
-                  ),
+                FadeSlideIn(
+                  delay: AppConstants.entranceStagger * 2,
                   child: Text(
-                    word.usageExample,
-                    style: AppTypography.body(fontSize: 16),
+                    'Örnek kullanım',
+                    style: AppTypography.brand(fontSize: 20),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                FadeSlideIn(
+                  delay: AppConstants.entranceStagger * 3,
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceElevated,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.divider),
+                    ),
+                    child: Text(
+                      word.usageExample,
+                      style: AppTypography.body(fontSize: 16),
+                    ),
                   ),
                 ),
               ],
