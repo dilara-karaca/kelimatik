@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/errors/app_error.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/quiz_question.dart';
 import '../../domain/models/study_mode.dart';
+import '../navigation/app_navigation.dart';
 import '../providers/catalog_providers.dart';
 import '../providers/lives_provider.dart';
 import '../providers/quiz_provider.dart';
+import '../widgets/app_error_view.dart';
 import '../widgets/favorite_toggle_icon.dart';
 import '../widgets/lives_hearts.dart';
 import '../widgets/motion/motion.dart';
@@ -21,49 +24,81 @@ import '../widgets/word_card.dart';
 class QuizScreen extends ConsumerWidget {
   const QuizScreen({super.key});
 
+  void _leaveToOrigin(BuildContext context) {
+    AppNavigation.popRoute(context);
+  }
+
+  void _leaveToHome(BuildContext context, WidgetRef ref) {
+    AppNavigation.leaveToHome(context, ref);
+  }
+
+  void _handleSystemBack(BuildContext context, WidgetRef ref) {
+    final quiz = ref.read(quizProvider);
+    if (quiz.showOutOfLivesPanel) {
+      ref.read(quizProvider.notifier).acknowledgeOutOfLives();
+      _leaveToHome(context, ref);
+      return;
+    }
+    if (quiz.showResult) {
+      ref.read(quizProvider.notifier).acknowledgeResult();
+      _leaveToOrigin(context);
+      return;
+    }
+    _leaveToOrigin(context);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final quiz = ref.watch(quizProvider);
     final lives = ref.watch(livesProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: PlayfulBackground(
-        child: SafeArea(
-          child: Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                child: _buildBody(context, ref, quiz, lives.current),
-              ),
-              if (quiz.showOutOfLivesPanel)
-                Positioned.fill(
-                  child: OutOfLivesPanel(
-                    nextLifeLabel: lives.nextLifeCountdownLabel,
-                    onRestart: () {
-                      ref.read(quizProvider.notifier).acknowledgeOutOfLives();
-                      Navigator.of(context).pop();
-                    },
-                  ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        _handleSystemBack(context, ref);
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: PlayfulBackground(
+          child: SafeArea(
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                  child: _buildBody(context, ref, quiz, lives.current),
                 ),
-              if (quiz.showResult && quiz.result != null)
-                Positioned.fill(
-                  child: SessionResultPanel(
-                    result: quiz.result!,
-                    onClose: () {
-                      ref.read(quizProvider.notifier).acknowledgeResult();
-                      Navigator.of(context).pop();
-                    },
-                    onRetry: quiz.result!.mode == StudyMode.favorites
-                        ? () {
-                            ref.read(quizProvider.notifier).startSession(
-                                  QuizSessionConfig.favorites(),
-                                );
-                          }
-                        : null,
+                if (quiz.showOutOfLivesPanel)
+                  Positioned.fill(
+                    child: OutOfLivesPanel(
+                      nextLifeLabel: lives.nextLifeCountdownLabel,
+                      onRestart: () {
+                        ref
+                            .read(quizProvider.notifier)
+                            .acknowledgeOutOfLives();
+                        _leaveToHome(context, ref);
+                      },
+                    ),
                   ),
-                ),
-            ],
+                if (quiz.showResult && quiz.result != null)
+                  Positioned.fill(
+                    child: SessionResultPanel(
+                      result: quiz.result!,
+                      onClose: () {
+                        ref.read(quizProvider.notifier).acknowledgeResult();
+                        _leaveToOrigin(context);
+                      },
+                      onRetry: quiz.result!.mode == StudyMode.favorites
+                          ? () {
+                              ref.read(quizProvider.notifier).startSession(
+                                    QuizSessionConfig.favorites(),
+                                  );
+                            }
+                          : null,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -95,26 +130,40 @@ class QuizScreen extends ConsumerWidget {
             ],
           ),
         );
-      case QuizStatus.error:
+      case QuizStatus.empty:
         return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                quiz.errorMessage ?? 'Bir hata oluştu.',
-                textAlign: TextAlign.center,
-                style: AppTypography.body(
-                  color: AppColors.textPrimary,
-                  fontWeight: FontWeight.w700,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 36),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  quiz.errorMessage ?? 'Liste boş.',
+                  textAlign: TextAlign.center,
+                  style: AppTypography.title(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary.withValues(alpha: 0.55),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              FilledButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Geri Dön'),
-              ),
-            ],
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () => AppNavigation.popRoute(context),
+                  child: Text(
+                    'Geri Dön',
+                    style: AppTypography.body(fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ],
+            ),
           ),
+        );
+      case QuizStatus.error:
+        return AppErrorView(
+          info: quiz.errorInfo ?? AppErrorInfo.loadFailed,
+          onRetry: () => ref.read(quizProvider.notifier).load(),
+          secondaryLabel: 'Geri Dön',
+          onSecondary: () => AppNavigation.popRoute(context),
         );
       case QuizStatus.ready:
         return _QuizContent(quiz: quiz, lives: lives);
@@ -180,7 +229,7 @@ class _QuizContent extends ConsumerWidget {
         Row(
           children: [
             IconButton(
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () => AppNavigation.popRoute(context),
               icon: const Icon(Icons.arrow_back_rounded),
               color: AppColors.textPrimary,
             ),
@@ -208,19 +257,34 @@ class _QuizContent extends ConsumerWidget {
             ),
             IconButton(
               onPressed: () async {
-                await ref.read(favoritesProvider.notifier).toggle(wordId);
-                if (!context.mounted) return;
-                final nowFav = ref.read(favoritesProvider).contains(wordId);
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      nowFav ? 'Favorilere eklendi' : 'Favorilerden çıkarıldı',
+                try {
+                  await ref.read(favoritesProvider.notifier).toggle(wordId);
+                  if (!context.mounted) return;
+                  final nowFav = ref.read(favoritesProvider).contains(wordId);
+                  ScaffoldMessenger.of(context).clearSnackBars();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        nowFav
+                            ? 'Favorilere eklendi'
+                            : 'Favorilerden çıkarıldı',
+                      ),
+                      duration: const Duration(milliseconds: 1400),
+                      behavior: SnackBarBehavior.floating,
                     ),
-                    duration: const Duration(milliseconds: 1400),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+                  );
+                } catch (error) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).clearSnackBars();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        error.toString().replaceFirst('Exception: ', ''),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
               },
               tooltip: isFavorite ? 'Favorilerden çıkar' : 'Favorilere ekle',
               icon: FavoriteToggleIcon(favorited: isFavorite, size: 24),

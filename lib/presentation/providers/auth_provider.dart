@@ -2,8 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../data/services/auth_service.dart';
+import '../../data/services/user_local_cache.dart';
 import '../../domain/models/auth_failure.dart';
+import 'catalog_providers.dart';
 import 'dependency_providers.dart';
+import 'lives_provider.dart';
+import 'stats_provider.dart';
 
 enum AppAuthStatus {
   /// Initial session check in progress.
@@ -125,24 +129,51 @@ class AuthNotifier extends Notifier<AppAuthState> {
     }
   }
 
-  /// Ready for profile/settings UI; not exposed in the UI yet.
   Future<void> signOut() async {
     if (state.isBusy) return;
     state = state.copyWith(isBusy: true, clearError: true);
     try {
       await _auth.signOut();
-      state = const AppAuthState(status: AppAuthStatus.unauthenticated);
-    } on AuthFailure catch (failure) {
-      state = state.copyWith(
-        isBusy: false,
-        errorMessage: failure.message,
-      );
+    } on AuthFailure {
+      // Still force local logout so AuthGate can show login.
     } catch (_) {
-      state = state.copyWith(
-        isBusy: false,
-        errorMessage: 'Çıkış yapılamadı. Lütfen tekrar dene.',
-      );
+      // Ignore — local unauthenticated below is the source of truth for UI.
     }
+    if (!ref.mounted) return;
+    await _clearLocalUserState();
+    state = const AppAuthState(status: AppAuthStatus.unauthenticated);
+  }
+
+  /// Permanently deletes the account in Supabase Auth + related DB rows.
+  Future<String?> deleteAccount() async {
+    if (state.isBusy) return 'İşlem devam ediyor. Lütfen bekle.';
+    state = state.copyWith(isBusy: true, clearError: true);
+    try {
+      await _auth.deleteAccount();
+      if (!ref.mounted) return null;
+      await _clearLocalUserState();
+      state = const AppAuthState(status: AppAuthStatus.unauthenticated);
+      return null;
+    } on AuthFailure catch (failure) {
+      if (!ref.mounted) return failure.message;
+      state = state.copyWith(isBusy: false, errorMessage: failure.message);
+      return failure.message;
+    } catch (_) {
+      const message = 'Hesap silinemedi. Lütfen tekrar dene.';
+      if (!ref.mounted) return message;
+      state = state.copyWith(isBusy: false, errorMessage: message);
+      return message;
+    }
+  }
+
+  Future<void> _clearLocalUserState() async {
+    await clearUserProgressLocalCache(ref.read(sharedPreferencesProvider));
+    ref.invalidate(statsProvider);
+    ref.invalidate(livesProvider);
+    ref.invalidate(bestStreakProvider);
+    ref.invalidate(dailyStreakProvider);
+    ref.invalidate(favoritesProvider);
+    ref.invalidate(mistakesProvider);
   }
 
   void clearError() {

@@ -116,22 +116,65 @@ class AuthService {
     }
   }
 
-  /// Clears Google + Supabase sessions. Ready for UI; not wired yet.
+  /// Clears Google + Supabase sessions (local fallback if network hangs).
   Future<void> signOut() async {
     try {
       if (_googleReady) {
-        await _googleSignIn.signOut();
+        await _googleSignIn.signOut().timeout(const Duration(seconds: 3));
       }
     } catch (_) {
       // Still clear Supabase session even if Google sign-out fails.
     }
 
     try {
-      await _client.auth.signOut();
+      await _client.auth
+          .signOut()
+          .timeout(const Duration(seconds: 5));
+    } on AuthException catch (error) {
+      try {
+        await _client.auth.signOut(scope: SignOutScope.local);
+      } catch (_) {
+        throw AuthFailure(_mapSupabaseAuthError(error));
+      }
+    } catch (_) {
+      // Prefer clearing local session so the UI can return to login.
+      try {
+        await _client.auth.signOut(scope: SignOutScope.local);
+      } catch (error) {
+        throw AuthFailure(_mapError(error));
+      }
+    }
+  }
+
+  /// Permanently deletes the signed-in Auth user and cascaded DB data.
+  Future<void> deleteAccount() async {
+    final user = currentUser;
+    if (user == null) {
+      throw const AuthFailure('Oturum bulunamadı. Tekrar giriş yap.');
+    }
+
+    try {
+      await _client.rpc('delete_own_account');
+    } on PostgrestException catch (error) {
+      throw AuthFailure(
+        error.message.trim().isEmpty
+            ? 'Hesap silinemedi. Lütfen tekrar dene.'
+            : 'Hesap silinemedi: ${error.message}',
+      );
     } on AuthException catch (error) {
       throw AuthFailure(_mapSupabaseAuthError(error));
     } catch (error) {
       throw AuthFailure(_mapError(error));
+    }
+
+    // Clear local sessions even if the server already invalidated the JWT.
+    try {
+      await signOut();
+    } catch (_) {
+      // Account is already gone; force local cleanup below if needed.
+      try {
+        await _client.auth.signOut(scope: SignOutScope.local);
+      } catch (_) {}
     }
   }
 

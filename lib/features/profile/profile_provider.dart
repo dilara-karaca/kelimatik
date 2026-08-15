@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/services/user_progress_sync_service.dart';
 import '../../presentation/providers/auth_provider.dart';
+import '../../presentation/providers/user_progress_bootstrap.dart';
 import 'profile_model.dart';
 import 'profile_service.dart';
 
@@ -100,11 +102,25 @@ class CurrentProfileNotifier extends Notifier<ProfileState> {
     );
     try {
       final profile = await _service.ensureProfile();
+      if (!profile.needsOnboarding) {
+        await hydrateUserProgressFromCloud(ref: ref, profile: profile);
+        final refreshed = await _service.refreshProfile();
+        state = ProfileState(
+          status: ProfileLoadStatus.ready,
+          profile: refreshed ?? profile,
+        );
+        return;
+      }
       state = ProfileState(
         status: ProfileLoadStatus.ready,
         profile: profile,
       );
     } on ProfileFailure catch (failure) {
+      state = ProfileState(
+        status: ProfileLoadStatus.error,
+        errorMessage: failure.message,
+      );
+    } on UserProgressSyncFailure catch (failure) {
       state = ProfileState(
         status: ProfileLoadStatus.error,
         errorMessage: failure.message,
@@ -200,6 +216,45 @@ class CurrentProfileNotifier extends Notifier<ProfileState> {
         username: username,
         selectedCharacter: selectedCharacter,
         onboardingCompleted: true,
+      );
+      final profile = await _service.refreshProfile();
+      if (profile == null) {
+        return 'Profil güncellenemedi. Lütfen tekrar dene.';
+      }
+      try {
+        await hydrateUserProgressFromCloud(ref: ref, profile: profile);
+      } on UserProgressSyncFailure catch (failure) {
+        return failure.message;
+      }
+      state = ProfileState(
+        status: ProfileLoadStatus.ready,
+        profile: profile,
+      );
+      return null;
+    } on ProfileFailure catch (failure) {
+      return failure.message;
+    } catch (_) {
+      return 'Profil güncellenemedi. Lütfen tekrar dene.';
+    }
+  }
+
+  /// Updates username and/or character on the remote `profiles` row.
+  ///
+  /// Returns an error message on failure; null on success.
+  Future<String?> updateIdentity({
+    String? username,
+    String? selectedCharacter,
+  }) async {
+    try {
+      if (username != null) {
+        final available = await _service.isUsernameAvailable(username);
+        if (!available) {
+          return 'Bu kullanıcı adı zaten kullanılıyor.';
+        }
+      }
+      await _service.updateProfile(
+        username: username,
+        selectedCharacter: selectedCharacter,
       );
       final profile = await _service.refreshProfile();
       if (profile == null) {

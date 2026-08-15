@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/constants/app_characters.dart';
 import 'profile_model.dart';
 
 /// User-facing failure for profile / Supabase data operations.
@@ -142,7 +143,14 @@ class ProfileService {
     }
 
     final payload = <String, dynamic>{};
-    if (username != null) payload['username'] = username.trim();
+    if (username != null) {
+      final trimmed = username.trim();
+      final validationError = UsernameRules.validate(trimmed);
+      if (validationError != null) {
+        throw ProfileFailure(validationError);
+      }
+      payload['username'] = trimmed;
+    }
     if (displayName != null) payload['display_name'] = displayName.trim();
     if (avatarUrl != null) payload['avatar_url'] = avatarUrl.trim();
     if (selectedCharacter != null) {

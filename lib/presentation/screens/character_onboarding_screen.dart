@@ -24,11 +24,15 @@ class _CharacterOnboardingScreenState
   final _usernameController = TextEditingController();
   final _usernameFocus = FocusNode();
 
-  int _selectedIndex = 0;
+  int _selectedIndex = AppCharacters.initialCarouselIndex;
   String? _usernameError;
   bool _submitting = false;
 
-  String get _selectedCharacterId => AppCharacters.ids[_selectedIndex];
+  String get _selectedCharacterId =>
+      AppCharacters.carouselIds[_selectedIndex];
+
+  bool get _hasRealCharacter =>
+      AppCharacters.isValidId(_selectedCharacterId);
 
   @override
   void dispose() {
@@ -52,7 +56,7 @@ class _CharacterOnboardingScreenState
       setState(() => _usernameError = validationError);
       return;
     }
-    if (!AppCharacters.isValidId(_selectedCharacterId)) {
+    if (!_hasRealCharacter) {
       setState(() => _usernameError = 'Lütfen bir karakter seç.');
       return;
     }
@@ -83,6 +87,7 @@ class _CharacterOnboardingScreenState
 
   bool get _canSubmit {
     if (_submitting) return false;
+    if (!_hasRealCharacter) return false;
     final username = _usernameController.text;
     return UsernameRules.validate(username) == null;
   }
@@ -131,16 +136,24 @@ class _CharacterOnboardingScreenState
                         ),
                         const SizedBox(height: 12),
                         CharacterArcCarousel(
-                          characterIds: AppCharacters.ids,
+                          characterIds: AppCharacters.carouselIds,
                           selectedIndex: _selectedIndex,
                           height: carouselHeight,
                           onSelected: (index) {
-                            setState(() => _selectedIndex = index);
+                            setState(() {
+                              _selectedIndex = index;
+                              if (_usernameError == 'Lütfen bir karakter seç.' &&
+                                  AppCharacters.isValidId(
+                                    AppCharacters.carouselIds[index],
+                                  )) {
+                                _usernameError = null;
+                              }
+                            });
                           },
                         ),
                         const SizedBox(height: 10),
                         _CharacterDots(
-                          count: AppCharacters.ids.length,
+                          count: AppCharacters.carouselIds.length,
                           selectedIndex: _selectedIndex,
                         ),
                         const SizedBox(height: 16),

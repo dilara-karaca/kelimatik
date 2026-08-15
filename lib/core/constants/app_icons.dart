@@ -34,4 +34,5 @@ abstract final class AppIcons {
   static const String info = '$_base/bilgi.png';
   static const String notification = '$_base/bildirim.png';
   static const String share = '$_base/paylas.png';
+  static const String logo = '$_base/logo.png';
 }

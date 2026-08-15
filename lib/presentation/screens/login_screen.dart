@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
 import '../providers/auth_provider.dart';
+import '../widgets/kelimatik_wordmark.dart';
 import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
 
@@ -40,40 +42,20 @@ class LoginScreen extends ConsumerWidget {
               children: [
                 const Spacer(flex: 2),
                 FadeSlideIn(
-                  child: Container(
-                    width: 112,
-                    height: 112,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.textPrimary.withValues(alpha: 0.06),
-                          blurRadius: 24,
-                          offset: const Offset(0, 10),
-                          spreadRadius: -4,
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.menu_book_rounded,
-                      size: 52,
-                      color: AppColors.accent,
-                    ),
+                  child: Image.asset(
+                    AppIcons.logo,
+                    width: 128,
+                    height: 128,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
                   ),
                 ),
-                const SizedBox(height: 20),
-                FadeSlideIn(
+                const SizedBox(height: 16),
+                const FadeSlideIn(
                   delay: AppConstants.entranceStagger,
-                  child: Text(
-                    'Kelimatik',
-                    style: AppTypography.brand(
-                      color: AppColors.accent,
-                      fontSize: 34,
-                    ),
-                  ),
+                  child: KelimatikWordmark(fontSize: 34),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 FadeSlideIn(
                   delay: AppConstants.entranceStagger * 2,
                   child: Text(

@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/errors/app_error.dart';
 import '../../core/utils/list_shuffle.dart';
 import '../../core/utils/quiz_haptics.dart';
 import '../../domain/models/quiz_question.dart';
@@ -14,7 +15,7 @@ import 'dependency_providers.dart';
 import 'lives_provider.dart';
 import 'stats_provider.dart';
 
-enum QuizStatus { idle, loading, ready, error }
+enum QuizStatus { idle, loading, ready, empty, error }
 
 class QuizState {
   const QuizState({
@@ -30,6 +31,7 @@ class QuizState {
     required this.startedAt,
     this.feedback,
     this.errorMessage,
+    this.errorInfo,
     this.outOfLives = false,
     this.showOutOfLivesPanel = false,
     this.showResult = false,
@@ -48,6 +50,7 @@ class QuizState {
   final int sessionWrong;
   final int answeredInDeck;
   final String? errorMessage;
+  final AppErrorInfo? errorInfo;
   final bool outOfLives;
   final bool showOutOfLivesPanel;
   final QuizSessionConfig config;
@@ -90,6 +93,8 @@ class QuizState {
     int? sessionWrong,
     int? answeredInDeck,
     String? errorMessage,
+    AppErrorInfo? errorInfo,
+    bool clearErrorInfo = false,
     bool? outOfLives,
     bool? showOutOfLivesPanel,
     QuizSessionConfig? config,
@@ -112,6 +117,7 @@ class QuizState {
       sessionWrong: sessionWrong ?? this.sessionWrong,
       answeredInDeck: answeredInDeck ?? this.answeredInDeck,
       errorMessage: errorMessage ?? this.errorMessage,
+      errorInfo: clearErrorInfo ? null : (errorInfo ?? this.errorInfo),
       outOfLives: outOfLives ?? this.outOfLives,
       showOutOfLivesPanel: showOutOfLivesPanel ?? this.showOutOfLivesPanel,
       config: config ?? this.config,
@@ -175,8 +181,9 @@ class QuizNotifier extends Notifier<QuizState> {
       final words = _resolveWordPool(allWords);
       if (words.isEmpty) {
         state = state.copyWith(
-          status: QuizStatus.error,
+          status: QuizStatus.empty,
           errorMessage: _emptyMessage(),
+          clearErrorInfo: true,
         );
         return;
       }
@@ -204,7 +211,8 @@ class QuizNotifier extends Notifier<QuizState> {
     } catch (error) {
       state = state.copyWith(
         status: QuizStatus.error,
-        errorMessage: 'Kelimeler yüklenemedi: $error',
+        errorMessage: null,
+        errorInfo: AppErrorInfo.from(error),
       );
     }
   }
@@ -212,7 +220,8 @@ class QuizNotifier extends Notifier<QuizState> {
   String _emptyMessage() {
     switch (_config.mode) {
       case StudyMode.mistakes:
-        return 'Henüz yanlış kelimen yok. Klasik modda çalışmaya başla!';
+        return 'Henüz yanlışın yok 🎉\n'
+            'Oyun oynadıkça burada tekrar etmen gereken kelimeleri göreceksin.';
       case StudyMode.favorites:
         return 'Favori kelimen yok. Arama veya detaydan favori ekleyebilirsin.';
       default:

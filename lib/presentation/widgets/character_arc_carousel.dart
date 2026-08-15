@@ -146,7 +146,7 @@ class _CharacterArcCarouselState extends State<CharacterArcCarousel>
               final h = constraints.maxHeight;
               final centerX = w / 2;
               final centerY = h * 0.46;
-              final baseSize = math.min(w * 0.56, h * 0.92);
+              final baseSize = math.min(w * 0.52, h * 0.88);
               final slotX = w * _slotSpread;
 
               final items = <_SlotItem>[];
@@ -161,14 +161,21 @@ class _CharacterArcCarouselState extends State<CharacterArcCarousel>
                 final edgeFade = t.abs() <= 1
                     ? 1.0
                     : (1.0 - (t.abs() - 1) / (_buildRadius - 1)).clamp(0.0, 1.0);
+                final visualScale =
+                    scale * AppCharacters.displayScaleFor(ids[i]);
+                // Only nudge the placeholder when it's the focus; side slots
+                // already get _sideDrop and looked too low with a fixed offset.
+                final yOffset = h *
+                    AppCharacters.displayYOffsetFor(ids[i]) *
+                    (1.0 - absT);
 
                 items.add(
                   _SlotItem(
                     index: i,
                     id: ids[i],
                     x: centerX + t * slotX,
-                    y: centerY + absT * h * _sideDrop,
-                    scale: scale,
+                    y: centerY + absT * h * _sideDrop + yOffset,
+                    scale: visualScale,
                     opacity: opacity * edgeFade,
                     rotation: t.clamp(-1.0, 1.0) * _sideRotation,
                     z: (100 - (t.abs() * 40)).round(),

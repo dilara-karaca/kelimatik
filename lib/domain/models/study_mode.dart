@@ -170,5 +170,9 @@ abstract final class FeaturePrefsKeys {
   static const mistakes = 'quiz_mistakes_v1';
   static const favorites = 'quiz_favorites_v1';
   static const streakBest = 'quiz_streak_best';
+  static const dailyStreak = 'quiz_daily_streak';
+  static const dailyStreakLastDate = 'quiz_daily_streak_last_date';
   static const displayName = 'display_name';
+  static const hapticsEnabled = 'settings_haptics_enabled';
+  static const notificationsEnabled = 'settings_notifications_enabled';
 }

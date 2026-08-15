@@ -5,8 +5,10 @@ import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/word_pair.dart';
+import '../navigation/app_navigation.dart';
 import '../navigation/soft_transitions.dart';
 import '../providers/catalog_providers.dart';
+import '../widgets/app_error_view.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/favorite_toggle_icon.dart';
 import '../widgets/motion/motion.dart';
@@ -45,7 +47,7 @@ class _WordSearchScreenState extends ConsumerState<WordSearchScreen> {
               children: [
                 if (!widget.embedded)
                   IconButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => AppNavigation.popRoute(context),
                     icon: const Icon(Icons.arrow_back_rounded),
                   ),
                 Expanded(
@@ -54,7 +56,7 @@ class _WordSearchScreenState extends ConsumerState<WordSearchScreen> {
                     autofocus: !widget.embedded,
                     onChanged: (v) => setState(() => _query = v.trim()),
                     decoration: InputDecoration(
-                      hintText: 'Kelime ara...',
+                      hintText: 'Doğru veya yanlış yazımı ara...',
                       filled: true,
                       fillColor: AppColors.surfaceElevated,
                       border: OutlineInputBorder(
@@ -85,14 +87,20 @@ class _WordSearchScreenState extends ConsumerState<WordSearchScreen> {
           Expanded(
             child: wordsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('$e')),
+              error: (e, _) => AppErrorView.fromError(
+                e,
+                onRetry: () => ref.invalidate(wordsListProvider),
+              ),
               data: (words) {
                 final q = _query.toLowerCase();
                 final filtered = q.isEmpty
-                    ? words.take(40).toList()
+                    ? List<WordPair>.from(words)
                     : words
-                        .where((w) => w.correct.toLowerCase().contains(q))
-                        .take(80)
+                        .where((w) {
+                          final correct = w.correct.toLowerCase();
+                          final wrong = w.wrong.toLowerCase();
+                          return correct.contains(q) || wrong.contains(q);
+                        })
                         .toList();
                 if (filtered.isEmpty) {
                   return Center(

@@ -6,9 +6,11 @@ import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/word_pair.dart';
+import '../navigation/app_navigation.dart';
 import '../navigation/soft_transitions.dart';
 import '../navigation/study_navigation.dart';
 import '../providers/catalog_providers.dart';
+import '../widgets/app_error_view.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/favorite_toggle_icon.dart';
 import '../widgets/motion/motion.dart';
@@ -72,7 +74,7 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
               children: [
                 if (!widget.embedded)
                   IconButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => AppNavigation.popRoute(context),
                     icon: const Icon(Icons.arrow_back_rounded),
                   ),
                 Expanded(
@@ -143,7 +145,10 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
           Expanded(
             child: wordsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('$e')),
+              error: (e, _) => AppErrorView.fromError(
+                e,
+                onRetry: () => ref.invalidate(wordsListProvider),
+              ),
               data: (words) {
                 final list = _filter(
                   words.where((w) => favIds.contains(w.id)).toList(),

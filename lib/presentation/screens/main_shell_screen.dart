@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
+import '../navigation/app_navigation.dart';
 import '../providers/main_tab_provider.dart';
+import '../providers/settings_provider.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
@@ -19,16 +21,29 @@ class MainShellScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(mainTabIndexProvider);
+    // Ensure settings (haptics etc.) load for quiz feedback.
+    ref.watch(appSettingsProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: PlayfulBackground(
-        child: _SoftTabBody(index: index),
-      ),
-      bottomNavigationBar: _AppBottomBar(
-        index: index,
-        onChanged: (i) =>
-            ref.read(mainTabIndexProvider.notifier).setIndex(i),
+    // Ara / Favoriler / Sıralama'da sistem geri tuşu uygulamadan çıkmak
+    // yerine Ana Sayfa sekmesine dönmeli.
+    return PopScope(
+      canPop: index == AppNavigation.homeTab,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (index != AppNavigation.homeTab) {
+          AppNavigation.goHomeTab(ref);
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: PlayfulBackground(
+          child: _SoftTabBody(index: index),
+        ),
+        bottomNavigationBar: _AppBottomBar(
+          index: index,
+          onChanged: (i) =>
+              ref.read(mainTabIndexProvider.notifier).setIndex(i),
+        ),
       ),
     );
   }

@@ -17,7 +17,13 @@ class LivesNotifier extends Notifier<LivesState> {
     final loaded = ref.read(livesRepositoryProvider).load().refreshed();
     _ensureTicker(loaded);
     // Persist refreshed value so offline gains are saved.
-    Future.microtask(() => _persist(loaded));
+    Future.microtask(() async {
+      try {
+        await _persist(loaded);
+      } catch (_) {
+        // Cloud sync may fail offline; local cache already holds [loaded].
+      }
+    });
     return loaded;
   }
 
@@ -45,15 +51,26 @@ class LivesNotifier extends Notifier<LivesState> {
     }
   }
 
-  Future<void> _persist(LivesState lives) {
-    return ref.read(livesRepositoryProvider).save(lives);
+  Future<void> _persist(LivesState lives, {bool critical = false}) async {
+    try {
+      await ref.read(livesRepositoryProvider).save(lives);
+    } catch (_) {
+      if (critical) rethrow;
+    }
   }
 
   Future<LivesState> loseLife() async {
+    final previous = state;
     final next = state.loseOne();
     state = next;
     _ensureTicker(next);
-    await _persist(next);
+    try {
+      await _persist(next, critical: true);
+    } catch (_) {
+      state = previous;
+      _ensureTicker(previous);
+      rethrow;
+    }
     return next;
   }
 

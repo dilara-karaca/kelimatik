@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_typography.dart';
+import '../navigation/app_navigation.dart';
 import '../providers/catalog_providers.dart';
 import '../widgets/favorite_toggle_icon.dart';
 import '../widgets/motion/motion.dart';
@@ -38,7 +39,7 @@ class WordDetailScreen extends ConsumerWidget {
                   children: [
                     AnimatedPressable(
                       child: IconButton(
-                        onPressed: () => Navigator.pop(context),
+                        onPressed: () => AppNavigation.popRoute(context),
                         icon: const Icon(Icons.arrow_back_rounded),
                       ),
                     ),

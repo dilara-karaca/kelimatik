@@ -12,6 +12,7 @@ import '../providers/lives_provider.dart';
 import '../providers/main_tab_provider.dart';
 import '../providers/stats_provider.dart';
 import '../widgets/app_icon.dart';
+import '../widgets/app_side_drawer.dart';
 import '../widgets/challenge_presets_sheet.dart';
 import '../widgets/kelimatik_wordmark.dart';
 import '../widgets/motion/motion.dart';
@@ -55,90 +56,101 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lives = ref.watch(livesProvider);
-    final bestStreak = ref.watch(bestStreakProvider);
+    final dailyStreak = ref.watch(dailyStreakProvider);
     final wordOfDay = ref.watch(wordOfTheDayProvider);
     final stats = ref.watch(statsProvider);
 
-    final body = SafeArea(
-      bottom: !embedded,
-      child: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                FadeSlideIn(
-                  delay: Duration.zero,
-                  child: _HomeHeader(
-                    lives: lives.current,
-                    streak: bestStreak,
-                    regenLabel:
-                        lives.isFull ? null : lives.nextLifeCountdownLabel,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                FadeSlideIn(
-                  delay: AppConstants.entranceStagger,
-                  child: _HeroCard(
-                    wordCorrect: wordOfDay?.correct ?? '…',
-                    wordHint: wordOfDay?.usageExample ?? '',
-                    onSearch: () => _goTab(ref, 1),
-                    onDetail: wordOfDay == null
-                        ? null
-                        : () => _open(
-                              context,
-                              WordDetailScreen(wordId: wordOfDay.id),
-                            ),
-                    onFavorites: () => _goTab(ref, 2),
-                  ),
-                ),
-                const SizedBox(height: 28),
-                FadeSlideIn(
-                  delay: AppConstants.entranceStagger * 2,
-                  child: Text(
-                    'Öğrenme Modları',
-                    style: AppTypography.brand(fontSize: 20),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                FadeSlideIn(
-                  delay: AppConstants.entranceStagger * 3,
-                  child: _ClassicModeCard(
-                    onTap: () => _openMode(context, ref, StudyMode.classic),
-                  ),
-                ),
-                const SizedBox(height: 18),
-                FadeSlideIn(
-                  delay: AppConstants.entranceStagger * 4,
-                  child: _ModeCircleGrid(
-                    onChallenge: () =>
-                        _openMode(context, ref, StudyMode.challenge),
-                    onMistakes: () =>
-                        _openMode(context, ref, StudyMode.mistakes),
-                    onStreak: () => _openMode(context, ref, StudyMode.streak),
-                    onInfinite: () =>
-                        _openMode(context, ref, StudyMode.infinite),
-                  ),
-                ),
-                const SizedBox(height: 28),
-                FadeSlideIn(
-                  delay: AppConstants.entranceStagger * 5,
-                  child: _PerformanceSummary(
-                    totalCorrect: stats.totalCorrect,
-                    successRate: stats.successRate,
-                  ),
-                ),
-              ]),
-            ),
-          ),
-        ],
-      ),
-    );
-
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: embedded ? body : PlayfulBackground(child: body),
+      drawer: const AppSideDrawer(),
+      body: Builder(
+        builder: (scaffoldContext) {
+          final body = SafeArea(
+            bottom: !embedded,
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate([
+                      FadeSlideIn(
+                        delay: Duration.zero,
+                        child: _HomeHeader(
+                          lives: lives.current,
+                          streak: dailyStreak.current,
+                          streakAlive: dailyStreak.isAlive,
+                          regenLabel: lives.isFull
+                              ? null
+                              : lives.nextLifeCountdownLabel,
+                          onMenuTap: () =>
+                              Scaffold.of(scaffoldContext).openDrawer(),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      FadeSlideIn(
+                        delay: AppConstants.entranceStagger,
+                        child: _HeroCard(
+                          wordCorrect: wordOfDay?.correct ?? '…',
+                          wordHint: wordOfDay?.usageExample ?? '',
+                          onSearch: () => _goTab(ref, 1),
+                          onDetail: wordOfDay == null
+                              ? null
+                              : () => _open(
+                                    context,
+                                    WordDetailScreen(wordId: wordOfDay.id),
+                                  ),
+                          onFavorites: () => _goTab(ref, 2),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      FadeSlideIn(
+                        delay: AppConstants.entranceStagger * 2,
+                        child: Text(
+                          'Öğrenme Modları',
+                          style: AppTypography.brand(fontSize: 20),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      FadeSlideIn(
+                        delay: AppConstants.entranceStagger * 3,
+                        child: _ClassicModeCard(
+                          onTap: () =>
+                              _openMode(context, ref, StudyMode.classic),
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                      FadeSlideIn(
+                        delay: AppConstants.entranceStagger * 4,
+                        child: _ModeCircleGrid(
+                          onChallenge: () =>
+                              _openMode(context, ref, StudyMode.challenge),
+                          onMistakes: () =>
+                              _openMode(context, ref, StudyMode.mistakes),
+                          onStreak: () =>
+                              _openMode(context, ref, StudyMode.streak),
+                          onInfinite: () =>
+                              _openMode(context, ref, StudyMode.infinite),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+                      FadeSlideIn(
+                        delay: AppConstants.entranceStagger * 5,
+                        child: _PerformanceSummary(
+                          totalCorrect: stats.totalCorrect,
+                          successRate: stats.successRate,
+                        ),
+                      ),
+                    ]),
+                  ),
+                ),
+              ],
+            ),
+          );
+
+          return embedded ? body : PlayfulBackground(child: body);
+        },
+      ),
     );
   }
 }
@@ -166,12 +178,16 @@ class _HomeHeader extends StatelessWidget {
   const _HomeHeader({
     required this.lives,
     required this.streak,
+    required this.streakAlive,
+    required this.onMenuTap,
     this.regenLabel,
   });
 
   final int lives;
   final int streak;
+  final bool streakAlive;
   final String? regenLabel;
+  final VoidCallback onMenuTap;
 
   @override
   Widget build(BuildContext context) {
@@ -179,6 +195,18 @@ class _HomeHeader extends StatelessWidget {
 
     return Row(
       children: [
+        IconButton(
+          tooltip: 'Menü',
+          onPressed: onMenuTap,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+          icon: const Icon(
+            Icons.menu_rounded,
+            size: 28,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        const SizedBox(width: 2),
         const KelimatikWordmark(fontSize: 26),
         const SizedBox(width: 8),
         Expanded(
@@ -238,7 +266,9 @@ class _HomeHeader extends StatelessWidget {
                       color: AppColors.divider,
                     ),
                     _StatChip(
-                      icon: AppIcons.streakActive,
+                      icon: streakAlive && streak > 0
+                          ? AppIcons.streakActive
+                          : AppIcons.streakLost,
                       value: '$streak',
                     ),
                   ],

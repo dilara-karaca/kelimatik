@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
-import '../../core/constants/app_icons.dart';
+import '../../core/errors/app_error.dart';
 import '../../core/theme/app_typography.dart';
 import '../../features/profile/profile_provider.dart';
 import '../providers/auth_provider.dart';
 import '../screens/character_onboarding_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/main_shell_screen.dart';
-import 'app_icon.dart';
+import 'app_error_view.dart';
 
 /// Google session → profile ensure → onboarding / home / login.
 class AuthGate extends ConsumerWidget {
@@ -32,12 +32,27 @@ class AuthGate extends ConsumerWidget {
             return const MainShellScreen();
           }
           if (profile.status == ProfileLoadStatus.error) {
-            return _ProfileErrorScaffold(
-              message: profile.errorMessage ??
-                  'Profil hazırlanamadı. Lütfen tekrar dene.',
-              onRetry: () =>
-                  ref.read(currentProfileProvider.notifier).ensureProfile(),
-              onSignOut: () => ref.read(authProvider.notifier).signOut(),
+            final info = AppErrorInfo.from(profile.errorMessage);
+            // Prefer offline / load titles; keep profile-specific fallback.
+            final resolved = info.kind == AppErrorKind.offline
+                ? AppErrorInfo.offline
+                : const AppErrorInfo(
+                    kind: AppErrorKind.loadFailed,
+                    title: 'Veri yüklenemedi',
+                    message: 'Profilini yükleyemedik.\nTekrar dene.',
+                  );
+            return Scaffold(
+              backgroundColor: AppColors.backgroundTop,
+              body: SafeArea(
+                child: AppErrorView(
+                  info: resolved,
+                  onRetry: () =>
+                      ref.read(currentProfileProvider.notifier).ensureProfile(),
+                  secondaryLabel: 'Çıkış Yap',
+                  onSecondary: () =>
+                      ref.read(authProvider.notifier).signOut(),
+                ),
+              ),
             );
           }
           return const _BootScaffold(label: 'Profil hazırlanıyor...');
@@ -99,79 +114,6 @@ class _BootScaffold extends StatelessWidget {
               ),
             ],
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ProfileErrorScaffold extends StatelessWidget {
-  const _ProfileErrorScaffold({
-    required this.message,
-    required this.onRetry,
-    required this.onSignOut,
-  });
-
-  final String message;
-  final VoidCallback onRetry;
-  final VoidCallback onSignOut;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundTop,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const AppIcon(AppIcons.profile, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                'Profil açılamadı',
-                style: AppTypography.brand(fontSize: 22),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                message,
-                style: AppTypography.title(fontSize: 14),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: FilledButton(
-                  onPressed: onRetry,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: Text(
-                    'Tekrar Dene',
-                    style: AppTypography.body(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: onSignOut,
-                child: Text(
-                  'Çıkış Yap',
-                  style: AppTypography.body(fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

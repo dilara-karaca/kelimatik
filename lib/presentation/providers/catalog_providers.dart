@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/models/daily_streak_state.dart';
 import '../../domain/models/mistake_entry.dart';
 import '../../domain/models/word_pair.dart';
 import 'dependency_providers.dart';
@@ -64,8 +65,24 @@ class FavoritesNotifier extends Notifier<Set<int>> {
   Set<int> build() => ref.read(favoritesRepositoryProvider).loadIds();
 
   Future<void> toggle(int wordId) async {
-    await ref.read(favoritesRepositoryProvider).toggle(wordId);
-    state = ref.read(favoritesRepositoryProvider).loadIds();
+    final previous = state;
+    final next = Set<int>.from(previous);
+    if (next.contains(wordId)) {
+      next.remove(wordId);
+    } else {
+      next.add(wordId);
+    }
+    state = next;
+    try {
+      await ref.read(favoritesRepositoryProvider).setFavorite(
+            wordId,
+            next.contains(wordId),
+          );
+      state = ref.read(favoritesRepositoryProvider).loadIds();
+    } catch (_) {
+      state = previous;
+      rethrow;
+    }
   }
 
   bool isFavorite(int wordId) => state.contains(wordId);
@@ -80,11 +97,31 @@ class BestStreakNotifier extends Notifier<int> {
 
   Future<void> consider(int streak) async {
     if (streak <= state) return;
-    await ref.read(streakRepositoryProvider).saveBest(streak);
+    final previous = state;
     state = streak;
+    try {
+      await ref.read(streakRepositoryProvider).saveBest(streak);
+    } catch (_) {
+      state = previous;
+      rethrow;
+    }
+  }
+}
+
+final dailyStreakProvider =
+    NotifierProvider<DailyStreakNotifier, DailyStreakState>(
+  DailyStreakNotifier.new,
+);
+
+class DailyStreakNotifier extends Notifier<DailyStreakState> {
+  @override
+  DailyStreakState build() => ref.read(dailyStreakRepositoryProvider).load();
+
+  void reload() {
+    state = ref.read(dailyStreakRepositoryProvider).load();
   }
 }
 
 final leaderboardProvider = FutureProvider((ref) {
-  return ref.watch(leaderboardRepositoryProvider).fetchTop();
+  return ref.watch(leaderboardRepositoryProvider).fetchTop(limit: 500);
 });
