@@ -11,10 +11,18 @@ class OutOfLivesPanel extends StatelessWidget {
     super.key,
     required this.nextLifeLabel,
     required this.onRestart,
+    this.onWatchAd,
+    this.watchAdEnabled = true,
   });
 
   final String nextLifeLabel;
   final VoidCallback onRestart;
+
+  /// When non-null, enables "Reklam izle · 1 can kazan".
+  final VoidCallback? onWatchAd;
+
+  /// Disable while an ad is loading/showing (no spam taps).
+  final bool watchAdEnabled;
 
   bool get _isReady => nextLifeLabel.isEmpty || nextLifeLabel == '00:00';
 
@@ -68,7 +76,9 @@ class OutOfLivesPanel extends StatelessWidget {
                   icon: Icons.play_circle_filled_rounded,
                   background: AppColors.accent,
                   foreground: Colors.white,
-                  onPressed: null,
+                  onPressed: (onWatchAd != null && watchAdEnabled)
+                      ? onWatchAd
+                      : null,
                 ),
                 const SizedBox(height: 10),
                 _PanelButton(

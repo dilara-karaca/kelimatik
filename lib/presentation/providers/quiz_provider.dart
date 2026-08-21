@@ -422,6 +422,19 @@ class QuizNotifier extends Notifier<QuizState> {
     );
   }
 
+  /// After a rewarded +1 life: dismiss out-of-lives UI and continue the deck.
+  void resumeAfterLifeGained() {
+    _advanceTimer?.cancel();
+    _challengeTimer?.cancel();
+    if (!state.showOutOfLivesPanel && !state.outOfLives) return;
+    state = state.copyWith(
+      outOfLives: false,
+      showOutOfLivesPanel: false,
+      clearFeedback: true,
+    );
+    _advance();
+  }
+
   void acknowledgeResult() {
     _advanceTimer?.cancel();
     _challengeTimer?.cancel();

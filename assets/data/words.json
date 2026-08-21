@@ -2553,5 +2553,170 @@
     "id": 511,
     "correct": "öge",
     "wrong": "öğe"
+  },
+  {
+    "id": 512,
+    "correct": "gerçeküstü",
+    "wrong": "gerçek üstü"
+  },
+  {
+    "id": 513,
+    "correct": "öğleüstü",
+    "wrong": "öğle üstü"
+  },
+  {
+    "id": 514,
+    "correct": "öğleüzeri",
+    "wrong": "öğle üzeri"
+  },
+  {
+    "id": 515,
+    "correct": "ayakaltı",
+    "wrong": "ayak altı"
+  },
+  {
+    "id": 516,
+    "correct": "kubbealtı",
+    "wrong": "kubbe altı"
+  },
+  {
+    "id": 517,
+    "correct": "yastıkaltı",
+    "wrong": "yastık altı"
+  },
+  {
+    "id": 518,
+    "correct": "dilaltı",
+    "wrong": "dil altı"
+  },
+  {
+    "id": 519,
+    "correct": "altüst",
+    "wrong": "alt üst"
+  },
+  {
+    "id": 520,
+    "correct": "alt yazı",
+    "wrong": "altyazı"
+  },
+  {
+    "id": 521,
+    "correct": "alt kurul",
+    "wrong": "altkurul"
+  },
+  {
+    "id": 522,
+    "correct": "alt kat",
+    "wrong": "altkat"
+  },
+  {
+    "id": 523,
+    "correct": "alt geçit",
+    "wrong": "altgeçit"
+  },
+  {
+    "id": 524,
+    "correct": "alt başlık",
+    "wrong": "altbaşlık"
+  },
+  {
+    "id": 525,
+    "correct": "deri altı",
+    "wrong": "derialtı"
+  },
+  {
+    "id": 526,
+    "correct": "deniz altı",
+    "wrong": "denizaltı"
+  },
+  {
+    "id": 527,
+    "correct": "göz altı",
+    "wrong": "gözaltı"
+  },
+  {
+    "id": 528,
+    "correct": "toprak altı",
+    "wrong": "toprakaltı"
+  },
+  {
+    "id": 529,
+    "correct": "su altı",
+    "wrong": "sualtı"
+  },
+  {
+    "id": 530,
+    "correct": "yer altı",
+    "wrong": "yeraltı"
+  },
+  {
+    "id": 531,
+    "correct": "baş üstü",
+    "wrong": "başüstü"
+  },
+  {
+    "id": 532,
+    "correct": "böbrek üstü bezi",
+    "wrong": "böbreküstü bezi"
+  },
+  {
+    "id": 533,
+    "correct": "tepe üstü",
+    "wrong": "tepeüstü"
+  },
+  {
+    "id": 534,
+    "correct": "yol üstü",
+    "wrong": "yolüstü"
+  },
+  {
+    "id": 535,
+    "correct": "yatak üstü",
+    "wrong": "yataküstü"
+  },
+  {
+    "id": 536,
+    "correct": "üst küme",
+    "wrong": "üstküme"
+  },
+  {
+    "id": 537,
+    "correct": "üst kurul",
+    "wrong": "üstkurul"
+  },
+  {
+    "id": 538,
+    "correct": "üst kat",
+    "wrong": "üstkat"
+  },
+  {
+    "id": 539,
+    "correct": "üst katman",
+    "wrong": "üstkatman"
+  },
+  {
+    "id": 540,
+    "correct": "göz üzeri",
+    "wrong": "gözüzere"
+  },
+  {
+    "id": 541,
+    "correct": "zaman üzeri",
+    "wrong": "zamanüzeri"
+  },
+  {
+    "id": 542,
+    "correct": "ayak üzeri",
+    "wrong": "ayaküzeri"
+  },
+  {
+    "id": 543,
+    "correct": "diz üzeri",
+    "wrong": "dizüzeri"
+  },
+  {
+    "id": 544,
+    "correct": "masa üzeri",
+    "wrong": "masaüzeri"
   }
 ]

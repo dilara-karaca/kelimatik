@@ -74,6 +74,23 @@ class LivesNotifier extends Notifier<LivesState> {
     return next;
   }
 
+  /// Grants +1 life (rewarded ad). No-op when already full.
+  Future<LivesState> gainLife() async {
+    final previous = state;
+    final next = state.gainOne();
+    if (next.current == previous.current) return next;
+    state = next;
+    _ensureTicker(next);
+    try {
+      await _persist(next, critical: true);
+    } catch (_) {
+      state = previous;
+      _ensureTicker(previous);
+      rethrow;
+    }
+    return next;
+  }
+
   void refresh() {
     final next = state.refreshed();
     state = next;

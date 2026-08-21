@@ -5,6 +5,10 @@
         android:label="Kelimatik"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Google AdMob App ID (production). -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3385068294638701~5347513217"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

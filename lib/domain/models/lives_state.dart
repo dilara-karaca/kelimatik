@@ -111,6 +111,24 @@ class LivesState {
     );
   }
 
+  /// Adds one life (e.g. rewarded ad). Caps at [AppConstants.maxLives].
+  LivesState gainOne([DateTime? at]) {
+    final clock = at ?? DateTime.now();
+    final refreshedState = refreshed(clock);
+    if (refreshedState.isFull) return refreshedState;
+
+    final next = refreshedState.current + 1;
+    if (next >= AppConstants.maxLives) {
+      return LivesState(current: AppConstants.maxLives, now: clock);
+    }
+
+    return LivesState(
+      current: next,
+      regenStartedAt: refreshedState.regenStartedAt ?? clock,
+      now: clock,
+    );
+  }
+
   LivesState copyWithClock(DateTime clock) {
     return LivesState(
       current: current,

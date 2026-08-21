@@ -4,12 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/errors/app_error.dart';
 import '../../core/theme/app_typography.dart';
+import '../../data/services/ads/rewarded_ad_service.dart';
 import '../../domain/models/quiz_question.dart';
 import '../../domain/models/study_mode.dart';
 import '../navigation/app_navigation.dart';
+import '../providers/ads_provider.dart';
 import '../providers/catalog_providers.dart';
 import '../providers/lives_provider.dart';
 import '../providers/quiz_provider.dart';
+import '../widgets/ads/ad_banner.dart';
 import '../widgets/app_error_view.dart';
 import '../widgets/favorite_toggle_icon.dart';
 import '../widgets/lives_hearts.dart';
@@ -62,41 +65,45 @@ class QuizScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         body: PlayfulBackground(
           child: SafeArea(
-            child: Stack(
+            child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                  child: _buildBody(context, ref, quiz, lives.current),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                        child: _buildBody(context, ref, quiz, lives.current),
+                      ),
+                      if (quiz.showOutOfLivesPanel)
+                        const Positioned.fill(
+                          child: _OutOfLivesAdOverlay(),
+                        ),
+                      if (quiz.showResult && quiz.result != null)
+                        Positioned.fill(
+                          child: SessionResultPanel(
+                            result: quiz.result!,
+                            onClose: () {
+                              ref
+                                  .read(quizProvider.notifier)
+                                  .acknowledgeResult();
+                              _leaveToOrigin(context);
+                            },
+                            onRetry: quiz.result!.mode == StudyMode.favorites
+                                ? () {
+                                    ref
+                                        .read(quizProvider.notifier)
+                                        .startSession(
+                                          QuizSessionConfig.favorites(),
+                                        );
+                                  }
+                                : null,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-                if (quiz.showOutOfLivesPanel)
-                  Positioned.fill(
-                    child: OutOfLivesPanel(
-                      nextLifeLabel: lives.nextLifeCountdownLabel,
-                      onRestart: () {
-                        ref
-                            .read(quizProvider.notifier)
-                            .acknowledgeOutOfLives();
-                        _leaveToHome(context, ref);
-                      },
-                    ),
-                  ),
-                if (quiz.showResult && quiz.result != null)
-                  Positioned.fill(
-                    child: SessionResultPanel(
-                      result: quiz.result!,
-                      onClose: () {
-                        ref.read(quizProvider.notifier).acknowledgeResult();
-                        _leaveToOrigin(context);
-                      },
-                      onRetry: quiz.result!.mode == StudyMode.favorites
-                          ? () {
-                              ref.read(quizProvider.notifier).startSession(
-                                    QuizSessionConfig.favorites(),
-                                  );
-                            }
-                          : null,
-                    ),
-                  ),
+                // Single quiz banner: below content, above system inset (SafeArea).
+                const Center(child: AdBanner()),
               ],
             ),
           ),
@@ -356,6 +363,73 @@ class _QuizContent extends ConsumerWidget {
           total: quiz.totalWords == 0 ? 1 : quiz.totalWords,
         ),
       ],
+    );
+  }
+}
+
+/// Out-of-lives UI + rewarded ad → +1 can (only after a full watch).
+class _OutOfLivesAdOverlay extends ConsumerStatefulWidget {
+  const _OutOfLivesAdOverlay();
+
+  @override
+  ConsumerState<_OutOfLivesAdOverlay> createState() =>
+      _OutOfLivesAdOverlayState();
+}
+
+class _OutOfLivesAdOverlayState extends ConsumerState<_OutOfLivesAdOverlay> {
+  bool _busy = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Ensure a rewarded unit is warming while the panel is visible.
+    Future.microtask(() {
+      ref.read(adServiceProvider).preloadFullScreenAds();
+    });
+  }
+
+  Future<void> _watchAdForLife() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+
+    final ads = ref.read(adServiceProvider);
+    final result = await ads.showRewarded(
+      onUserEarnedReward: () async {
+        await ref.read(livesProvider.notifier).gainLife();
+      },
+    );
+
+    if (!mounted) return;
+
+    // Resume only when AdMob confirmed a full watch AND life was applied.
+    if (result == RewardedAdShowResult.rewarded &&
+        ref.read(livesProvider).canPlay) {
+      ref.read(quizProvider.notifier).resumeAfterLifeGained();
+    } else if (result == RewardedAdShowResult.unavailable) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Reklam şu an yüklenemedi. Biraz sonra tekrar dene.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+
+    if (mounted) setState(() => _busy = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final lives = ref.watch(livesProvider);
+
+    return OutOfLivesPanel(
+      nextLifeLabel: lives.nextLifeCountdownLabel,
+      watchAdEnabled: !_busy,
+      onWatchAd: _watchAdForLife,
+      onRestart: () {
+        ref.read(quizProvider.notifier).acknowledgeOutOfLives();
+        AppNavigation.leaveToHome(context, ref);
+      },
     );
   }
 }
