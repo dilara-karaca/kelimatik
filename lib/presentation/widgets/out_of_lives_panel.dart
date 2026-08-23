@@ -88,11 +88,6 @@ class OutOfLivesPanel extends StatelessWidget {
                   foreground: AppColors.textPrimary,
                   onPressed: null,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  'Reklam ve Premium yakında',
-                  style: AppTypography.title(fontSize: 11),
-                ),
                 const SizedBox(height: 8),
                 AnimatedPressable(
                   child: TextButton.icon(

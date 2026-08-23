@@ -175,4 +175,7 @@ abstract final class FeaturePrefsKeys {
   static const displayName = 'display_name';
   static const hapticsEnabled = 'settings_haptics_enabled';
   static const notificationsEnabled = 'settings_notifications_enabled';
+
+  /// Local Premium flag until Play Billing is wired.
+  static const premiumActive = 'premium_active_v1';
 }

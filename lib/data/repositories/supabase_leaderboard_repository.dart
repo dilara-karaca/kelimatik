@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/constants/app_characters.dart';
+import '../../core/constants/app_constants.dart';
 import '../../domain/models/leaderboard_entry.dart';
 
 /// Leaderboard from `public.profiles` ordered by XP / correct answers.
@@ -41,10 +42,15 @@ class SupabaseLeaderboardRepository implements LeaderboardRepository {
     ];
   }
 
+  /// Prefer stored [xp]; if an older 1:1 row still has xp == correct_count,
+  /// show the new scale so ranking stays consistent until next progress sync.
   int _score(Map<String, dynamic> row) {
     final xp = (row['xp'] as num?)?.toInt() ?? 0;
     final correct = (row['correct_count'] as num?)?.toInt() ?? 0;
-    return xp >= correct ? xp : correct;
+    final fromCorrect =
+        (correct * AppConstants.xpPerCorrectAnswer).clamp(0, 1 << 30);
+    if (correct > 0 && xp == correct) return fromCorrect;
+    return xp < 0 ? 0 : xp;
   }
 
   String? _characterId(Object? raw) {

@@ -49,6 +49,20 @@ void main() {
       expect(stats.totalWrong, 1);
       expect(stats.successRate, closeTo(66.66, 0.1));
     });
+
+    test('xp is 10 per correct and ignores wrong answers', () {
+      final stats = QuizStats.empty
+          .recordCorrect()
+          .recordCorrect()
+          .recordCorrect()
+          .recordWrong()
+          .recordWrong();
+
+      expect(stats.totalCorrect, 3);
+      expect(stats.totalWrong, 2);
+      expect(stats.xp, 3 * AppConstants.xpPerCorrectAnswer);
+      expect(stats.xp, 30);
+    });
   });
 
   group('LivesState', () {
@@ -62,7 +76,8 @@ void main() {
 
     test('regenerates lives offline', () {
       final start = DateTime(2026, 1, 1, 12);
-      final later = start.add(const Duration(minutes: 5));
+      // Two full regen cycles should restore two lives.
+      final later = start.add(AppConstants.lifeRegenDuration * 2);
       final state = LivesState(
         current: 2,
         regenStartedAt: start,
@@ -74,7 +89,7 @@ void main() {
 
     test('keeps countdown after regenerating one life', () {
       final start = DateTime(2026, 1, 1, 12);
-      final later = start.add(const Duration(minutes: 2));
+      final later = start.add(AppConstants.lifeRegenDuration);
       final state = LivesState(
         current: 0,
         regenStartedAt: start,
@@ -93,7 +108,10 @@ void main() {
 
       expect(state.current, 2);
       expect(state.regenStartedAt, now);
-      expect(state.nextLifeCountdownLabel, '02:00');
+      final minutes = AppConstants.lifeRegenDuration.inMinutes
+          .toString()
+          .padLeft(2, '0');
+      expect(state.nextLifeCountdownLabel, '$minutes:00');
     });
   });
 }

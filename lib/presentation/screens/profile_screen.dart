@@ -10,11 +10,14 @@ import '../../features/profile/profile_provider.dart';
 import '../navigation/app_navigation.dart';
 import '../navigation/soft_transitions.dart';
 import '../providers/catalog_providers.dart';
+import '../providers/premium_provider.dart';
 import '../providers/stats_provider.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/character_arc_carousel.dart';
 import '../widgets/kelimatik_wordmark.dart';
+import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
+import 'premium_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -124,6 +127,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final stats = ref.watch(statsProvider);
     final bestStreak = ref.watch(bestStreakProvider);
     final dailyStreak = ref.watch(dailyStreakProvider);
+    final isPremium = ref.watch(premiumProvider);
 
     ref.listen(currentProfileProvider, (previous, next) {
       final name = next.profile?.username;
@@ -362,6 +366,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       textAlign: TextAlign.center,
                       style: AppTypography.title(fontSize: 14),
                     ),
+                    const SizedBox(height: 18),
+                    _PremiumEntryCard(
+                      isPremium: isPremium,
+                      onTap: () => pushSoft(context, const PremiumScreen()),
+                    ),
                     const SizedBox(height: 24),
                     _StatGrid(
                       items: [
@@ -401,6 +410,88 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PremiumEntryCard extends StatelessWidget {
+  const _PremiumEntryCard({
+    required this.isPremium,
+    required this.onTap,
+  });
+
+  final bool isPremium;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedPressable(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: isPremium
+                ? AppColors.primary.withValues(alpha: 0.45)
+                : AppColors.divider,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.textPrimary.withValues(alpha: 0.05),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+              spreadRadius: -6,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.14),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Icon(
+                isPremium
+                    ? Icons.verified_rounded
+                    : Icons.workspace_premium_rounded,
+                color: AppColors.primary,
+                size: 26,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    isPremium ? 'Premium üyeliğin aktif' : 'Kelimatik Premium',
+                    style: AppTypography.body(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    isPremium
+                        ? 'Sınırsız can · Reklamsız'
+                        : 'Sınırsız can · Reklamsız kullanım',
+                    style: AppTypography.title(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary.withValues(alpha: 0.7),
+            ),
+          ],
         ),
       ),
     );

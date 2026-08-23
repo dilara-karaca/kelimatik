@@ -1,3 +1,5 @@
+import '../../core/constants/app_constants.dart';
+
 /// Aggregated quiz statistics — designed for future expansion.
 class QuizStats {
   const QuizStats({
@@ -9,6 +11,10 @@ class QuizStats {
   final int totalWrong;
 
   int get totalAnswered => totalCorrect + totalWrong;
+
+  /// Lifetime XP from correct answers only (never reduced by wrong answers).
+  int get xp =>
+      (totalCorrect * AppConstants.xpPerCorrectAnswer).clamp(0, 1 << 30);
 
   double get successRate {
     if (totalAnswered == 0) return 0;

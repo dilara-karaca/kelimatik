@@ -9,7 +9,13 @@ abstract final class AppConstants {
   static const String livesPrefsKey = 'quiz_lives';
 
   static const int maxLives = 5;
-  static const Duration lifeRegenDuration = Duration(minutes: 2);
+
+  /// Wall-clock duration to regenerate each missing life.
+  /// Change this single value to retune regen (e.g. 15 or 30 minutes).
+  static const Duration lifeRegenDuration = Duration(minutes: 10);
+
+  /// XP awarded for each correct answer. Wrong answers grant 0 XP.
+  static const int xpPerCorrectAnswer = 10;
 
   /// Page / route transitions — snappy fade + subtle slide (~200–280ms).
   static const Duration pageTransition = Duration(milliseconds: 260);

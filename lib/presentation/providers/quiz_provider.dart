@@ -13,6 +13,7 @@ import '../../domain/models/word_pair.dart';
 import 'catalog_providers.dart';
 import 'dependency_providers.dart';
 import 'lives_provider.dart';
+import 'premium_provider.dart';
 import 'stats_provider.dart';
 
 enum QuizStatus { idle, loading, ready, empty, error }
@@ -311,7 +312,7 @@ class QuizNotifier extends Notifier<QuizState> {
 
     unawaited(QuizHaptics.wrong());
     var outOfLives = false;
-    if (_config.consumeLives) {
+    if (_config.consumeLives && !ref.read(premiumProvider)) {
       final lives = await ref.read(livesProvider.notifier).loseLife();
       outOfLives = lives.isEmpty;
     }

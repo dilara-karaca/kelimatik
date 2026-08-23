@@ -160,8 +160,8 @@ class UserProgressSyncService {
     if (stats != null) {
       payload['correct_count'] = stats.totalCorrect;
       payload['wrong_count'] = stats.totalWrong;
-      // Ranking score derived from lifetime correct answers.
-      payload['xp'] = stats.totalCorrect;
+      // XP = correct answers × xpPerCorrectAnswer (wrong answers add 0).
+      payload['xp'] = stats.xp;
       payload['level'] = (1 + (stats.totalCorrect ~/ 25)).clamp(1, 99);
     }
     if (bestQuizStreak != null) {
