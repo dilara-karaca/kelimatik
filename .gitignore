@@ -48,3 +48,9 @@ app.*.map.json
 .env
 .env.local
 .env.*.local
+
+# Android release signing (never commit)
+android/key.properties
+**/*.jks
+**/*.keystore
+!/**/debug.keystore
