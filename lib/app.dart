@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'core/theme/app_theme.dart';
 import 'presentation/navigation/soft_transitions.dart';
 import 'presentation/widgets/auth_gate.dart';
+import 'presentation/widgets/notification_lifecycle_binder.dart';
 
 class KelimatikApp extends StatelessWidget {
   const KelimatikApp({super.key});
@@ -24,7 +25,7 @@ class KelimatikApp extends StatelessWidget {
           },
         ),
       ),
-      home: const AuthGate(),
+      home: const NotificationLifecycleBinder(child: AuthGate()),
     );
   }
 }

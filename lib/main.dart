@@ -9,7 +9,9 @@ import 'app.dart';
 import 'core/config/admob_bootstrap.dart';
 import 'core/config/supabase_bootstrap.dart';
 import 'core/constants/app_constants.dart';
+import 'core/utils/quiz_sounds.dart';
 import 'presentation/providers/ads_provider.dart';
+import 'presentation/providers/billing_provider.dart';
 import 'presentation/providers/dependency_providers.dart';
 
 Future<void> main() async {
@@ -62,8 +64,12 @@ class _AdsBootstrapState extends ConsumerState<_AdsBootstrap> {
   @override
   void initState() {
     super.initState();
+    // Listen to Play purchaseStream before the first frame.
+    ref.read(billingProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(QuizSounds.warmUp());
       unawaited(_prepareAds());
+      unawaited(_prepareBilling());
     });
   }
 
@@ -73,6 +79,10 @@ class _AdsBootstrapState extends ConsumerState<_AdsBootstrap> {
     if (AdMobBootstrap.isInitialized) {
       ref.read(adServiceProvider).preloadFullScreenAds();
     }
+  }
+
+  Future<void> _prepareBilling() async {
+    await ref.read(billingProvider.notifier).bootstrap();
   }
 
   @override

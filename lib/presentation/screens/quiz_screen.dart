@@ -1,19 +1,27 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/errors/app_error.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/services/ads/rewarded_ad_service.dart';
 import '../../domain/models/quiz_question.dart';
 import '../../domain/models/study_mode.dart';
 import '../navigation/app_navigation.dart';
+import '../navigation/soft_transitions.dart';
 import '../providers/ads_provider.dart';
 import '../providers/catalog_providers.dart';
 import '../providers/lives_provider.dart';
+import '../providers/premium_provider.dart';
 import '../providers/quiz_provider.dart';
 import '../widgets/ads/ad_banner.dart';
+import '../widgets/app_dialogs.dart';
 import '../widgets/app_error_view.dart';
+import '../widgets/app_icon.dart';
+import '../widgets/bomb_fuse_bar.dart';
 import '../widgets/favorite_toggle_icon.dart';
 import '../widgets/lives_hearts.dart';
 import '../widgets/motion/motion.dart';
@@ -23,35 +31,84 @@ import '../widgets/progress_footer.dart';
 import '../widgets/score_header.dart';
 import '../widgets/session_result_panel.dart';
 import '../widgets/word_card.dart';
+import 'premium_screen.dart';
 
-class QuizScreen extends ConsumerWidget {
+class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({super.key});
 
-  void _leaveToOrigin(BuildContext context) {
+  @override
+  ConsumerState<QuizScreen> createState() => _QuizScreenState();
+}
+
+class _QuizScreenState extends ConsumerState<QuizScreen> {
+  var _exitPromptOpen = false;
+
+  void _leaveToOrigin() {
     AppNavigation.popRoute(context);
   }
 
-  void _leaveToHome(BuildContext context, WidgetRef ref) {
+  void _leaveToHome() {
     AppNavigation.leaveToHome(context, ref);
   }
 
-  void _handleSystemBack(BuildContext context, WidgetRef ref) {
+  Future<void> _requestExit({required bool toHome}) async {
+    if (_exitPromptOpen) return;
     final quiz = ref.read(quizProvider);
+    final notifier = ref.read(quizProvider.notifier);
+
     if (quiz.showOutOfLivesPanel) {
-      ref.read(quizProvider.notifier).acknowledgeOutOfLives();
-      _leaveToHome(context, ref);
+      notifier.acknowledgeOutOfLives();
+      _leaveToHome();
       return;
     }
+
     if (quiz.showResult) {
-      ref.read(quizProvider.notifier).acknowledgeResult();
-      _leaveToOrigin(context);
+      notifier.acknowledgeResult();
+      _leaveToOrigin();
       return;
     }
-    _leaveToOrigin(context);
+
+    if (quiz.bombExploding) return;
+
+    if (quiz.status != QuizStatus.ready) {
+      notifier.abandonSession();
+      _leaveToOrigin();
+      return;
+    }
+
+    _exitPromptOpen = true;
+    notifier.pauseSessionClock();
+    final leave = await showAppConfirmDialog(
+      context,
+      title: 'Çıkmak istediğine emin misin?',
+      message: 'Bu moddaki ilerlemen kaybolacak.',
+      cancelLabel: 'Devam Et',
+      confirmLabel: 'Çık',
+      destructive: true,
+    );
+    if (!mounted) return;
+    _exitPromptOpen = false;
+
+    final latest = ref.read(quizProvider);
+    if (leave == true) {
+      if (latest.showResult) {
+        ref.read(quizProvider.notifier).acknowledgeResult();
+      } else {
+        ref.read(quizProvider.notifier).abandonSession();
+      }
+      if (toHome) {
+        _leaveToHome();
+      } else {
+        _leaveToOrigin();
+      }
+      return;
+    }
+
+    ref.read(quizProvider.notifier).resumeSessionClock();
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final quiz = ref.watch(quizProvider);
     final lives = ref.watch(livesProvider);
 
@@ -59,7 +116,7 @@ class QuizScreen extends ConsumerWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
-        _handleSystemBack(context, ref);
+        unawaited(_requestExit(toHome: false));
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -72,7 +129,7 @@ class QuizScreen extends ConsumerWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-                        child: _buildBody(context, ref, quiz, lives.current),
+                        child: _buildBody(quiz, lives.current),
                       ),
                       if (quiz.showOutOfLivesPanel)
                         const Positioned.fill(
@@ -86,17 +143,36 @@ class QuizScreen extends ConsumerWidget {
                               ref
                                   .read(quizProvider.notifier)
                                   .acknowledgeResult();
-                              _leaveToOrigin(context);
+                              if (quiz.result!.mode == StudyMode.streak) {
+                                _leaveToHome();
+                              } else {
+                                _leaveToOrigin();
+                              }
                             },
-                            onRetry: quiz.result!.mode == StudyMode.favorites
-                                ? () {
-                                    ref
-                                        .read(quizProvider.notifier)
-                                        .startSession(
-                                          QuizSessionConfig.favorites(),
-                                        );
-                                  }
-                                : null,
+                            onRetry: switch (quiz.result!.mode) {
+                              StudyMode.favorites => () {
+                                  ref
+                                      .read(quizProvider.notifier)
+                                      .startSession(
+                                        QuizSessionConfig.favorites(),
+                                      );
+                                },
+                              StudyMode.streak => () {
+                                  ref
+                                      .read(quizProvider.notifier)
+                                      .startSession(
+                                        QuizSessionConfig.streak(),
+                                      );
+                                },
+                              StudyMode.bomb => () {
+                                  ref
+                                      .read(quizProvider.notifier)
+                                      .startSession(
+                                        QuizSessionConfig.bomb(),
+                                      );
+                                },
+                              _ => null,
+                            },
                           ),
                         ),
                     ],
@@ -112,12 +188,7 @@ class QuizScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBody(
-    BuildContext context,
-    WidgetRef ref,
-    QuizState quiz,
-    int lives,
-  ) {
+  Widget _buildBody(QuizState quiz, int lives) {
     switch (quiz.status) {
       case QuizStatus.idle:
       case QuizStatus.loading:
@@ -155,7 +226,7 @@ class QuizScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
                 TextButton(
-                  onPressed: () => AppNavigation.popRoute(context),
+                  onPressed: () => unawaited(_requestExit(toHome: false)),
                   child: Text(
                     'Geri Dön',
                     style: AppTypography.body(fontWeight: FontWeight.w700),
@@ -170,10 +241,14 @@ class QuizScreen extends ConsumerWidget {
           info: quiz.errorInfo ?? AppErrorInfo.loadFailed,
           onRetry: () => ref.read(quizProvider.notifier).load(),
           secondaryLabel: 'Geri Dön',
-          onSecondary: () => AppNavigation.popRoute(context),
+          onSecondary: () => unawaited(_requestExit(toHome: false)),
         );
       case QuizStatus.ready:
-        return _QuizContent(quiz: quiz, lives: lives);
+        return _QuizContent(
+          quiz: quiz,
+          lives: lives,
+          onExit: () => unawaited(_requestExit(toHome: false)),
+        );
     }
   }
 }
@@ -182,10 +257,12 @@ class _QuizContent extends ConsumerWidget {
   const _QuizContent({
     required this.quiz,
     required this.lives,
+    required this.onExit,
   });
 
   final QuizState quiz;
   final int lives;
+  final VoidCallback onExit;
 
   WordCardVisualState _leftState() {
     final feedback = quiz.feedback;
@@ -236,7 +313,7 @@ class _QuizContent extends ConsumerWidget {
         Row(
           children: [
             IconButton(
-              onPressed: () => AppNavigation.popRoute(context),
+              onPressed: onExit,
               icon: const Icon(Icons.arrow_back_rounded),
               color: AppColors.textPrimary,
             ),
@@ -250,15 +327,16 @@ class _QuizContent extends ConsumerWidget {
                       fontSize: 22,
                     ),
                   ),
-                  Text(
-                    quiz.config.mode == StudyMode.streak
-                        ? 'Seri: ${quiz.currentStreak}'
-                        : 'Hangisi doğru?',
-                    style: AppTypography.title(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
+                  if (quiz.config.mode == StudyMode.streak)
+                    _StreakCountBadge(count: quiz.currentStreak)
+                  else
+                    Text(
+                      'Hangisi doğru?',
+                      style: AppTypography.title(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ),
@@ -301,6 +379,19 @@ class _QuizContent extends ConsumerWidget {
         if (showLives) ...[
           const SizedBox(height: 4),
           LivesHearts(current: lives, size: 24, spacing: 5),
+        ],
+        if (quiz.config.mode == StudyMode.bomb) ...[
+          const SizedBox(height: 8),
+          BombFuseBar(
+            cycle: quiz.bombCycle,
+            deadline: quiz.bombDeadline,
+            pausedMs: quiz.bombPausedMs,
+            exploding: quiz.bombExploding,
+            frozen: quiz.feedback?.outcome == AnswerOutcome.correct,
+            onExplosionFinished: () {
+              ref.read(quizProvider.notifier).completeBombExplosion();
+            },
+          ),
         ],
         if (remaining != null) ...[
           const SizedBox(height: 8),
@@ -367,6 +458,37 @@ class _QuizContent extends ConsumerWidget {
   }
 }
 
+class _StreakCountBadge extends StatelessWidget {
+  const _StreakCountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const AppIcon(AppIcons.streakActive, size: 22),
+        const SizedBox(width: 6),
+        AnimatedSwitcher(
+          duration: AppConstants.cardSwap,
+          switchInCurve: AppConstants.pageCurve,
+          switchOutCurve: AppConstants.pageReverseCurve,
+          transitionBuilder: softFadeSlideTransition,
+          child: Text(
+            '$count',
+            key: ValueKey(count),
+            style: AppTypography.score(
+              color: AppColors.primary,
+              fontSize: 20,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 /// Out-of-lives UI + rewarded ad → +1 can (only after a full watch).
 class _OutOfLivesAdOverlay extends ConsumerStatefulWidget {
   const _OutOfLivesAdOverlay();
@@ -420,12 +542,21 @@ class _OutOfLivesAdOverlayState extends ConsumerState<_OutOfLivesAdOverlay> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<bool>(premiumProvider, (previous, next) {
+      if (next) {
+        ref.read(quizProvider.notifier).resumeAfterLifeGained();
+      }
+    });
+
     final lives = ref.watch(livesProvider);
 
     return OutOfLivesPanel(
       nextLifeLabel: lives.nextLifeCountdownLabel,
       watchAdEnabled: !_busy,
       onWatchAd: _watchAdForLife,
+      onOpenPremium: () {
+        pushSoftFullscreen(context, const PremiumScreen());
+      },
       onRestart: () {
         ref.read(quizProvider.notifier).acknowledgeOutOfLives();
         AppNavigation.leaveToHome(context, ref);

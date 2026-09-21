@@ -9,7 +9,7 @@ import '../navigation/app_navigation.dart';
 import '../navigation/soft_transitions.dart';
 import '../providers/catalog_providers.dart';
 import '../widgets/app_error_view.dart';
-import '../widgets/app_icon.dart';
+import '../widgets/catalog_list_ui.dart';
 import '../widgets/favorite_toggle_icon.dart';
 import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
@@ -40,53 +40,64 @@ class _WordSearchScreenState extends ConsumerState<WordSearchScreen> {
     final body = SafeArea(
       bottom: !widget.embedded,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(widget.embedded ? 20 : 12, 8, 16, 8),
+            padding: EdgeInsets.fromLTRB(widget.embedded ? 20 : 8, 10, 20, 0),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (!widget.embedded)
-                  IconButton(
-                    onPressed: () => AppNavigation.popRoute(context),
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    autofocus: !widget.embedded,
-                    onChanged: (v) => setState(() => _query = v.trim()),
-                    decoration: InputDecoration(
-                      hintText: 'Doğru veya yanlış yazımı ara...',
-                      filled: true,
-                      fillColor: AppColors.surfaceElevated,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: AppColors.divider),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: AppColors.divider),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(
-                          color: AppColors.accent,
-                          width: 1.5,
-                        ),
-                      ),
-                      prefixIcon: const Padding(
-                        padding: EdgeInsets.all(12),
-                        child: AppIcon(AppIcons.search, size: 22),
-                      ),
+                  CatalogCircleButton(
+                    tooltip: 'Geri',
+                    onTap: () => AppNavigation.popRoute(context),
+                    child: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppColors.textPrimary,
                     ),
                   ),
+                if (!widget.embedded) const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ara',
+                        style: AppTypography.brand(fontSize: 26),
+                      ),
+                      Text(
+                        'Doğru yazımı hemen bul',
+                        style: AppTypography.title(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                wordsAsync.maybeWhen(
+                  data: (words) => CatalogCountChip(
+                    label: '${words.length} kelime',
+                  ),
+                  orElse: () => const SizedBox.shrink(),
                 ),
               ],
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
+            child: CatalogSearchField(
+              controller: _controller,
+              autofocus: !widget.embedded,
+              hintText: 'Doğru veya yanlış yazımı ara...',
+              onChanged: (v) => setState(() => _query = v.trim()),
+            ),
+          ),
           Expanded(
             child: wordsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: AppColors.accent),
+              ),
               error: (e, _) => AppErrorView.fromError(
                 e,
                 onRetry: () => ref.invalidate(wordsListProvider),
@@ -103,22 +114,43 @@ class _WordSearchScreenState extends ConsumerState<WordSearchScreen> {
                         })
                         .toList();
                 if (filtered.isEmpty) {
-                  return Center(
-                    child: Text('Sonuç yok', style: AppTypography.title()),
+                  return CatalogEmptyState(
+                    icon: AppIcons.search,
+                    title: 'Sonuç yok',
+                    message: q.isEmpty
+                        ? 'Henüz listelenecek kelime yok.'
+                        : '“$_query” ile eşleşen bir yazım bulunamadı.',
                   );
                 }
-                return ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    return SoftListAppear(
-                      index: index,
-                      child: AnimatedPressable(
-                        child: _WordTile(word: filtered[index]),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (q.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(24, 2, 24, 6),
+                        child: Text(
+                          '${filtered.length} sonuç',
+                          style: AppTypography.title(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
-                    );
-                  },
+                    Expanded(
+                      child: ListView.separated(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                        itemCount: filtered.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          return SoftListAppear(
+                            index: index,
+                            child: _WordTile(word: filtered[index]),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -142,31 +174,16 @@ class _WordTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final fav = ref.watch(favoritesProvider).contains(word.id);
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: ListTile(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        title: Text(
-          word.correct,
-          style: AppTypography.body(fontWeight: FontWeight.w700),
-        ),
-        subtitle: Text(
-          'Yanlış: ${word.wrong}',
-          style: AppTypography.title(fontSize: 12),
-        ),
-        trailing: IconButton(
-          onPressed: () =>
-              ref.read(favoritesProvider.notifier).toggle(word.id),
-          tooltip: fav ? 'Favorilerden çıkar' : 'Favorilere ekle',
-          icon: FavoriteToggleIcon(favorited: fav, size: 24),
-        ),
-        onTap: () {
-          pushSoft(context, WordDetailScreen(wordId: word.id));
-        },
+    return CatalogWordTile(
+      correct: word.correct,
+      wrong: word.wrong,
+      accent: CatalogWordAccent.search,
+      onTap: () => pushSoft(context, WordDetailScreen(wordId: word.id)),
+      trailing: CatalogCircleButton(
+        highlighted: fav,
+        tooltip: fav ? 'Favorilerden çıkar' : 'Favorilere ekle',
+        onTap: () => ref.read(favoritesProvider.notifier).toggle(word.id),
+        child: FavoriteToggleIcon(favorited: fav, size: 20),
       ),
     );
   }

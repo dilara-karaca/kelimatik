@@ -23,27 +23,36 @@ class SessionResultPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final isStreak = result.mode == StudyMode.streak;
     final isFavorites = result.mode == StudyMode.favorites;
+    final isBomb = result.mode == StudyMode.bomb;
 
     final title = isStreak
         ? 'Seri Bitti!'
         : isFavorites
             ? 'Favoriler Bitti!'
-            : 'Challenge Sonucu';
+            : isBomb
+                ? 'Bomba Patladı!'
+                : 'Challenge Sonucu';
     final subtitle = isStreak
         ? 'İlk yanlışta seri sona erdi'
         : isFavorites
             ? 'Tüm favori kelimeleri tamamladın'
-            : 'Tur tamamlandı';
+            : isBomb
+                ? 'Süre doldu — fitil bombaya ulaştı'
+                : 'Tur tamamlandı';
     final icon = isStreak
         ? AppIcons.streakLost
         : isFavorites
             ? AppIcons.favorited
-            : AppIcons.league;
+            : isBomb
+                ? AppIcons.bombMode
+                : AppIcons.league;
     final accent = isStreak
         ? AppColors.accent
         : isFavorites
             ? AppColors.accent
-            : AppColors.sky;
+            : isBomb
+                ? AppColors.accentDeep
+                : AppColors.sky;
 
     return SoftOverlayAppear(
       child: DecoratedBox(
@@ -146,41 +155,56 @@ class SessionResultPanel extends StatelessWidget {
                   width: double.infinity,
                   height: 50,
                   child: AnimatedPressable(
-                    child: FilledButton(
+                    child: FilledButton.icon(
                       onPressed: onRetry,
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.accent,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                      ),
-                      child: Text(
-                        'Tekrar Çalış',
+                      icon: const Icon(Icons.replay_rounded, size: 22),
+                      label: Text(
+                        isStreak || isBomb ? 'Tekrar Oyna' : 'Tekrar Çalış',
                         style: AppTypography.body(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
                           fontSize: 15,
                         ),
                       ),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.accent,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: AnimatedPressable(
-                    child: TextButton(
-                      onPressed: onClose,
-                      child: Text(
-                        'Tamam',
-                        style: AppTypography.body(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
+                    child: isStreak
+                        ? TextButton.icon(
+                            onPressed: onClose,
+                            icon: const AppIcon(AppIcons.home, size: 18),
+                            label: Text(
+                              'Ana sayfaya dön',
+                              style: AppTypography.body(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          )
+                        : TextButton(
+                            onPressed: onClose,
+                            child: Text(
+                              'Tamam',
+                              style: AppTypography.body(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
                   ),
                 ),
               ] else

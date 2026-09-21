@@ -20,6 +20,7 @@ android {
     ndkVersion = "27.0.12077973"
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -52,10 +53,41 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            // Native debug symbols for Play Console crash symbolication.
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+}
+
+// AGP leaves extractReleaseNativeSymbolTables empty for Flutter's already-stripped
+// engine .so files, so package merged native libs for Play Console upload.
+val zipReleaseNativeDebugSymbols by tasks.registering(Zip::class) {
+    description = "Zips merged native libraries for Google Play debug-symbol upload."
+    group = "build"
+    dependsOn("mergeReleaseNativeLibs")
+    from(
+        layout.buildDirectory.dir(
+            "intermediates/merged_native_libs/release/mergeReleaseNativeLibs/out/lib",
+        ),
+    )
+    archiveFileName.set("native-debug-symbols.zip")
+    destinationDirectory.set(
+        layout.buildDirectory.dir("outputs/native-debug-symbols/release"),
+    )
+}
+
+tasks.configureEach {
+    if (name == "bundleRelease") {
+        finalizedBy(zipReleaseNativeDebugSymbols)
+    }
 }

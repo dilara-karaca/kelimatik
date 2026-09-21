@@ -20,6 +20,10 @@ enum RewardedAdShowResult {
 
 /// Loads and shows rewarded ads. Reward only when the user completes the ad.
 class RewardedAdService {
+  RewardedAdService({bool Function()? isPremium}) : _isPremium = isPremium;
+
+  final bool Function()? _isPremium;
+
   RewardedAd? _ad;
   bool _isLoading = false;
   bool _isShowing = false;
@@ -27,7 +31,19 @@ class RewardedAdService {
   bool get isReady => _ad != null && !_isShowing;
   bool get isShowing => _isShowing;
 
+  bool get _premium => _isPremium?.call() ?? false;
+
+  void _dropLoadedAd() {
+    _ad?.dispose();
+    _ad = null;
+    _isLoading = false;
+  }
+
   Future<void> preload() async {
+    if (_premium) {
+      _dropLoadedAd();
+      return;
+    }
     if (!AdMobBootstrap.isInitialized) return;
     if (_ad != null || _isLoading || _isShowing) return;
 
@@ -62,6 +78,10 @@ class RewardedAdService {
   Future<RewardedAdShowResult> show({
     FutureOr<void> Function()? onUserEarnedReward,
   }) async {
+    if (_premium) {
+      _dropLoadedAd();
+      return RewardedAdShowResult.unavailable;
+    }
     final ad = _ad;
     if (ad == null || _isShowing) {
       preload();

@@ -10,8 +10,9 @@ class AdService {
   AdService({
     InterstitialAdService? interstitial,
     RewardedAdService? rewarded,
+    bool Function()? isPremium,
   })  : interstitial = interstitial ?? InterstitialAdService(),
-        rewarded = rewarded ?? RewardedAdService();
+        rewarded = rewarded ?? RewardedAdService(isPremium: isPremium);
 
   final InterstitialAdService interstitial;
   final RewardedAdService rewarded;

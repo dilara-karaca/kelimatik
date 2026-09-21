@@ -85,12 +85,27 @@ Future<T?> pushSoft<T extends Object?>(
   BuildContext context,
   Widget page, {
   bool fullscreenDialog = false,
+  bool rootNavigator = false,
 }) {
-  return Navigator.of(context).push<T>(
+  return Navigator.of(context, rootNavigator: rootNavigator).push<T>(
     SoftPageRoute<T>(
       builder: (_) => page,
       fullscreenDialog: fullscreenDialog,
     ),
+  );
+}
+
+/// Full-screen push that covers the main shell (quiz / game modes).
+Future<T?> pushSoftFullscreen<T extends Object?>(
+  BuildContext context,
+  Widget page, {
+  bool fullscreenDialog = false,
+}) {
+  return pushSoft<T>(
+    context,
+    page,
+    fullscreenDialog: fullscreenDialog,
+    rootNavigator: true,
   );
 }
 

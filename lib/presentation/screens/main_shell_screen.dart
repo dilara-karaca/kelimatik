@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
@@ -15,34 +16,70 @@ import 'home_screen.dart';
 import 'leaderboard_screen.dart';
 import 'word_search_screen.dart';
 
-class MainShellScreen extends ConsumerWidget {
+class MainShellScreen extends ConsumerStatefulWidget {
   const MainShellScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MainShellScreen> createState() => _MainShellScreenState();
+}
+
+class _MainShellScreenState extends ConsumerState<MainShellScreen> {
+  final _shellNavigatorKey = GlobalKey<NavigatorState>();
+
+  void _onTabChanged(int i) {
+    final nav = _shellNavigatorKey.currentState;
+    if (nav != null) {
+      nav.popUntil((route) => route.isFirst);
+      // Drawer uses local history on the tab route; popUntil won't close it.
+      if (nav.canPop()) nav.pop();
+    }
+    ref.read(mainTabIndexProvider.notifier).setIndex(i);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final index = ref.watch(mainTabIndexProvider);
     // Ensure settings (haptics etc.) load for quiz feedback.
     ref.watch(appSettingsProvider);
 
-    // Ara / Favoriler / Sıralama'da sistem geri tuşu uygulamadan çıkmak
-    // yerine Ana Sayfa sekmesine dönmeli.
+    // Nested pages / drawer first, then Ara/Favoriler/Sıralama → Ana Sayfa,
+    // then leave the app. canPop is always false so we read the nested
+    // navigator live (drawer local-history does not rebuild this widget).
     return PopScope(
-      canPop: index == AppNavigation.homeTab,
+      canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
+        final nested = _shellNavigatorKey.currentState;
+        if (nested != null && nested.canPop()) {
+          nested.pop();
+          return;
+        }
         if (index != AppNavigation.homeTab) {
           AppNavigation.goHomeTab(ref);
+          return;
         }
+        SystemNavigator.pop();
       },
       child: Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.white,
         body: PlayfulBackground(
-          child: _SoftTabBody(index: index),
+          child: Navigator(
+            key: _shellNavigatorKey,
+            onGenerateRoute: (settings) {
+              return PageRouteBuilder<void>(
+                settings: settings,
+                pageBuilder: (context, animation, secondaryAnimation) {
+                  return const _SoftTabBody();
+                },
+                transitionDuration: Duration.zero,
+                reverseTransitionDuration: Duration.zero,
+              );
+            },
+          ),
         ),
         bottomNavigationBar: _AppBottomBar(
           index: index,
-          onChanged: (i) =>
-              ref.read(mainTabIndexProvider.notifier).setIndex(i),
+          onChanged: _onTabChanged,
         ),
       ),
     );
@@ -50,16 +87,14 @@ class MainShellScreen extends ConsumerWidget {
 }
 
 /// Fades the active tab as one layer, then swaps — never stacks two pages.
-class _SoftTabBody extends StatefulWidget {
-  const _SoftTabBody({required this.index});
-
-  final int index;
+class _SoftTabBody extends ConsumerStatefulWidget {
+  const _SoftTabBody();
 
   @override
-  State<_SoftTabBody> createState() => _SoftTabBodyState();
+  ConsumerState<_SoftTabBody> createState() => _SoftTabBodyState();
 }
 
-class _SoftTabBodyState extends State<_SoftTabBody> {
+class _SoftTabBodyState extends ConsumerState<_SoftTabBody> {
   static const _tabs = <Widget>[
     HomeScreen(embedded: true),
     WordSearchScreen(embedded: true),
@@ -74,15 +109,7 @@ class _SoftTabBodyState extends State<_SoftTabBody> {
   @override
   void initState() {
     super.initState();
-    _visibleIndex = widget.index;
-  }
-
-  @override
-  void didUpdateWidget(covariant _SoftTabBody oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.index != widget.index) {
-      _animateTo(widget.index);
-    }
+    _visibleIndex = ref.read(mainTabIndexProvider);
   }
 
   Future<void> _animateTo(int next) async {
@@ -100,6 +127,10 @@ class _SoftTabBodyState extends State<_SoftTabBody> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<int>(mainTabIndexProvider, (previous, next) {
+      if (previous != next) _animateTo(next);
+    });
+
     return AnimatedOpacity(
       opacity: _opacity,
       duration: AppConstants.tabTransition ~/ 2,
@@ -130,10 +161,9 @@ class _AppBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final bottom = MediaQuery.paddingOf(context).bottom;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
             color: AppColors.textPrimary.withValues(alpha: 0.06),
@@ -143,34 +173,36 @@ class _AppBottomBar extends StatelessWidget {
           ),
         ],
       ),
-      padding: EdgeInsets.fromLTRB(10, 10, 10, 10 + bottom),
-      child: Row(
-        children: [
-          _NavItem(
-            label: 'Ana Sayfa',
-            icon: AppIcons.home,
-            selected: index == 0,
-            onTap: () => onChanged(0),
-          ),
-          _NavItem(
-            label: 'Ara',
-            icon: AppIcons.search,
-            selected: index == 1,
-            onTap: () => onChanged(1),
-          ),
-          _NavItem(
-            label: 'Favoriler',
-            icon: AppIcons.favorites,
-            selected: index == 2,
-            onTap: () => onChanged(2),
-          ),
-          _NavItem(
-            label: 'Sıralama',
-            icon: AppIcons.league,
-            selected: index == 3,
-            onTap: () => onChanged(3),
-          ),
-        ],
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(10, 10, 10, 10 + bottom),
+        child: Row(
+          children: [
+            _NavItem(
+              label: 'Ana Sayfa',
+              icon: AppIcons.home,
+              selected: index == 0,
+              onTap: () => onChanged(0),
+            ),
+            _NavItem(
+              label: 'Ara',
+              icon: AppIcons.search,
+              selected: index == 1,
+              onTap: () => onChanged(1),
+            ),
+            _NavItem(
+              label: 'Favoriler',
+              icon: AppIcons.favorites,
+              selected: index == 2,
+              onTap: () => onChanged(2),
+            ),
+            _NavItem(
+              label: 'Sıralama',
+              icon: AppIcons.league,
+              selected: index == 3,
+              onTap: () => onChanged(3),
+            ),
+          ],
+        ),
       ),
     );
   }

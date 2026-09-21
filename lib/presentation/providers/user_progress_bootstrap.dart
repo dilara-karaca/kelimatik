@@ -13,6 +13,7 @@ import '../../features/profile/profile_model.dart';
 import 'catalog_providers.dart';
 import 'dependency_providers.dart';
 import 'lives_provider.dart';
+import 'notification_provider.dart';
 import 'stats_provider.dart';
 
 /// Hydrates local cache from Supabase before the main shell opens.
@@ -109,6 +110,9 @@ Future<void> hydrateUserProgressFromCloud({
       current: profile.dailyStreak,
       lastLoginDate: profile.lastDailyLoginDate,
     );
+    await ref
+        .read(notificationCoordinatorProvider)
+        .recordStreakActivity(DateTime.now());
 
     await prefs.setString(UserCacheKeys.lastSyncedUserId, uid);
 

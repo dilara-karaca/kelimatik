@@ -12,6 +12,7 @@ class OutOfLivesPanel extends StatelessWidget {
     required this.nextLifeLabel,
     required this.onRestart,
     this.onWatchAd,
+    this.onOpenPremium,
     this.watchAdEnabled = true,
   });
 
@@ -20,6 +21,9 @@ class OutOfLivesPanel extends StatelessWidget {
 
   /// When non-null, enables "Reklam izle · 1 can kazan".
   final VoidCallback? onWatchAd;
+
+  /// When non-null, enables "Sınırsız can · Premium".
+  final VoidCallback? onOpenPremium;
 
   /// Disable while an ad is loading/showing (no spam taps).
   final bool watchAdEnabled;
@@ -86,7 +90,7 @@ class OutOfLivesPanel extends StatelessWidget {
                   icon: Icons.workspace_premium_rounded,
                   background: AppColors.wrongSoft,
                   foreground: AppColors.textPrimary,
-                  onPressed: null,
+                  onPressed: onOpenPremium,
                 ),
                 const SizedBox(height: 8),
                 AnimatedPressable(

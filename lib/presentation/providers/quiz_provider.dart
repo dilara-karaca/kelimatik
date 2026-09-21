@@ -7,12 +7,14 @@ import '../../core/constants/app_constants.dart';
 import '../../core/errors/app_error.dart';
 import '../../core/utils/list_shuffle.dart';
 import '../../core/utils/quiz_haptics.dart';
+import '../../core/utils/quiz_sounds.dart';
 import '../../domain/models/quiz_question.dart';
 import '../../domain/models/study_mode.dart';
 import '../../domain/models/word_pair.dart';
 import 'catalog_providers.dart';
 import 'dependency_providers.dart';
 import 'lives_provider.dart';
+import 'notification_provider.dart';
 import 'premium_provider.dart';
 import 'stats_provider.dart';
 
@@ -39,6 +41,10 @@ class QuizState {
     this.result,
     this.currentStreak = 0,
     this.remainingSeconds,
+    this.bombDeadline,
+    this.bombCycle = 0,
+    this.bombExploding = false,
+    this.bombPausedMs = 0,
   });
 
   final QuizStatus status;
@@ -60,13 +66,22 @@ class QuizState {
   final QuizSessionResult? result;
   final int currentStreak;
   final int? remainingSeconds;
+  final DateTime? bombDeadline;
+  final int bombCycle;
+  final bool bombExploding;
+  final int bombPausedMs;
 
   bool get isInteractive =>
       status == QuizStatus.ready &&
       feedback == null &&
       !outOfLives &&
       !showOutOfLivesPanel &&
-      !showResult;
+      !showResult &&
+      !bombExploding;
+
+  /// Active run that has not reached a result or out-of-lives panel.
+  bool get isInProgress =>
+      status == QuizStatus.ready && !showResult && !showOutOfLivesPanel;
 
   int get totalWords {
     final target = config.targetCount;
@@ -106,6 +121,11 @@ class QuizState {
     int? currentStreak,
     int? remainingSeconds,
     bool clearRemaining = false,
+    DateTime? bombDeadline,
+    bool clearBombDeadline = false,
+    int? bombCycle,
+    bool? bombExploding,
+    int? bombPausedMs,
   }) {
     return QuizState(
       status: status ?? this.status,
@@ -128,6 +148,11 @@ class QuizState {
       currentStreak: currentStreak ?? this.currentStreak,
       remainingSeconds:
           clearRemaining ? null : (remainingSeconds ?? this.remainingSeconds),
+      bombDeadline:
+          clearBombDeadline ? null : (bombDeadline ?? this.bombDeadline),
+      bombCycle: bombCycle ?? this.bombCycle,
+      bombExploding: bombExploding ?? this.bombExploding,
+      bombPausedMs: bombPausedMs ?? this.bombPausedMs,
     );
   }
 
@@ -151,13 +176,17 @@ class QuizNotifier extends Notifier<QuizState> {
   final Random _random = Random();
   Timer? _advanceTimer;
   Timer? _challengeTimer;
+  Timer? _bombTimer;
   QuizSessionConfig _config = QuizSessionConfig.classic();
+  var _lastTenCuePlayed = false;
 
   @override
   QuizState build() {
     ref.onDispose(() {
       _advanceTimer?.cancel();
       _challengeTimer?.cancel();
+      _bombTimer?.cancel();
+      unawaited(QuizSounds.stopAll());
     });
     return QuizState.initial;
   }
@@ -165,6 +194,9 @@ class QuizNotifier extends Notifier<QuizState> {
   Future<void> startSession([QuizSessionConfig? config]) async {
     _advanceTimer?.cancel();
     _challengeTimer?.cancel();
+    _bombTimer?.cancel();
+    _lastTenCuePlayed = false;
+    unawaited(QuizSounds.stopAll());
     _config = config ?? QuizSessionConfig.classic();
     state = QuizState.initial.copyWith(
       status: QuizStatus.loading,
@@ -209,6 +241,7 @@ class QuizNotifier extends Notifier<QuizState> {
       );
 
       _startChallengeClock();
+      _startBombFuse();
     } catch (error) {
       state = state.copyWith(
         status: QuizStatus.error,
@@ -248,7 +281,7 @@ class QuizNotifier extends Notifier<QuizState> {
       case StudyMode.classic:
       case StudyMode.challenge:
       case StudyMode.streak:
-      case StudyMode.infinite:
+      case StudyMode.bomb:
         return all;
     }
   }
@@ -261,11 +294,74 @@ class QuizNotifier extends Notifier<QuizState> {
       if (remaining == null) return;
       if (remaining <= 1) {
         _challengeTimer?.cancel();
+        unawaited(QuizSounds.stopTimerCue());
         _finishSession();
         return;
       }
-      state = state.copyWith(remainingSeconds: remaining - 1);
+      final next = remaining - 1;
+      if (next == 10 && !_lastTenCuePlayed) {
+        _lastTenCuePlayed = true;
+        unawaited(QuizSounds.lastTenSeconds());
+      }
+      state = state.copyWith(remainingSeconds: next);
     });
+  }
+
+  void _startBombFuse({int? remainingMs}) {
+    _bombTimer?.cancel();
+    _bombTimer = null;
+    if (_config.mode != StudyMode.bomb) return;
+    if (state.showResult ||
+        state.showOutOfLivesPanel ||
+        state.bombExploding ||
+        state.status != QuizStatus.ready) {
+      return;
+    }
+
+    final total = AppConstants.bombQuestionDuration.inMilliseconds;
+    final ms = remainingMs ?? total;
+    if (ms <= 0) {
+      _onBombTimeout();
+      return;
+    }
+
+    final resetCycle = remainingMs == null;
+    state = state.copyWith(
+      bombDeadline: DateTime.now().add(Duration(milliseconds: ms)),
+      bombCycle: resetCycle ? state.bombCycle + 1 : state.bombCycle,
+      bombExploding: false,
+      bombPausedMs: 0,
+    );
+    _bombTimer = Timer(Duration(milliseconds: ms), _onBombTimeout);
+  }
+
+  void _onBombTimeout() {
+    _bombTimer = null;
+    final current = state;
+    if (current.showResult ||
+        current.showOutOfLivesPanel ||
+        current.bombExploding) {
+      return;
+    }
+    if (current.feedback?.outcome == AnswerOutcome.correct) return;
+
+    _advanceTimer?.cancel();
+    unawaited(QuizHaptics.wrong());
+    unawaited(QuizSounds.fail());
+    state = current.copyWith(
+      bombExploding: true,
+      clearBombDeadline: true,
+      bombPausedMs: 0,
+    );
+    _advanceTimer = Timer(
+      AppConstants.bombExplosionDuration,
+      completeBombExplosion,
+    );
+  }
+
+  void completeBombExplosion() {
+    if (!state.bombExploding || state.showResult) return;
+    _finishSession();
   }
 
   QuizQuestion _buildQuestion(List<WordPair> words, int wordIndex) {
@@ -286,10 +382,16 @@ class QuizNotifier extends Notifier<QuizState> {
     final question = current.question!;
     final isCorrect = question.isCorrectChoice(choseLeft);
     final wordId = question.wordPair.id;
+    _noteStreakActivity();
 
     if (isCorrect) {
       unawaited(QuizHaptics.correct());
       final nextStreak = current.currentStreak + 1;
+      _playCorrectSound(nextStreak: nextStreak);
+      if (_config.mode == StudyMode.bomb) {
+        _bombTimer?.cancel();
+        _bombTimer = null;
+      }
       state = current.copyWith(
         feedback: AnswerFeedback(
           outcome: AnswerOutcome.correct,
@@ -298,6 +400,7 @@ class QuizNotifier extends Notifier<QuizState> {
         sessionCorrect: current.sessionCorrect + 1,
         answeredInDeck: current.answeredInDeck + 1,
         currentStreak: nextStreak,
+        clearBombDeadline: _config.mode == StudyMode.bomb,
       );
       unawaited(ref.read(statsProvider.notifier).recordCorrect());
       if (_config.recordMistakes) {
@@ -311,13 +414,24 @@ class QuizNotifier extends Notifier<QuizState> {
     }
 
     unawaited(QuizHaptics.wrong());
+    _playWrongSound(brokenStreak: current.currentStreak);
     var outOfLives = false;
+    // Lives drop only on a wrong answer — never because the user left the mode.
     if (_config.consumeLives && !ref.read(premiumProvider)) {
       final lives = await ref.read(livesProvider.notifier).loseLife();
       outOfLives = lives.isEmpty;
     }
 
-    state = current.copyWith(
+    final afterLives = state;
+    if (afterLives.bombExploding || afterLives.showResult) {
+      unawaited(ref.read(statsProvider.notifier).recordWrong());
+      if (_config.recordMistakes) {
+        await ref.read(mistakesProvider.notifier).recordWrong(wordId);
+      }
+      return;
+    }
+
+    state = afterLives.copyWith(
       feedback: AnswerFeedback(
         outcome: AnswerOutcome.wrong,
         selectedLeft: choseLeft,
@@ -333,12 +447,52 @@ class QuizNotifier extends Notifier<QuizState> {
       await ref.read(mistakesProvider.notifier).recordWrong(wordId);
     }
 
+    if (state.bombExploding || state.showResult) {
+      return;
+    }
+
     if (_config.endOnFirstWrong) {
       _scheduleFinish(AppConstants.wrongFeedbackDuration);
       return;
     }
 
     _scheduleAdvance(AppConstants.wrongFeedbackDuration);
+  }
+
+  void _playCorrectSound({required int nextStreak}) {
+    switch (_config.mode) {
+      case StudyMode.streak:
+        unawaited(
+          QuizSounds.correct(
+            streakMilestone: nextStreak > 0 && nextStreak % 5 == 0,
+          ),
+        );
+      case StudyMode.classic:
+      case StudyMode.challenge:
+      case StudyMode.mistakes:
+      case StudyMode.bomb:
+        unawaited(QuizSounds.correct());
+      case StudyMode.favorites:
+        break;
+    }
+  }
+
+  void _playWrongSound({required int brokenStreak}) {
+    switch (_config.mode) {
+      case StudyMode.streak:
+        if (brokenStreak > 0) {
+          unawaited(QuizSounds.fail());
+        } else {
+          unawaited(QuizSounds.incorrect());
+        }
+      case StudyMode.classic:
+      case StudyMode.challenge:
+      case StudyMode.mistakes:
+      case StudyMode.bomb:
+        unawaited(QuizSounds.incorrect());
+      case StudyMode.favorites:
+        break;
+    }
   }
 
   void _scheduleAdvance(Duration delay) {
@@ -353,8 +507,14 @@ class QuizNotifier extends Notifier<QuizState> {
 
   void _advance() {
     final current = state;
+    if (current.bombExploding) return;
     if (current.outOfLives) {
-      state = current.copyWith(showOutOfLivesPanel: true);
+      _bombTimer?.cancel();
+      _bombTimer = null;
+      state = current.copyWith(
+        showOutOfLivesPanel: true,
+        clearBombDeadline: true,
+      );
       return;
     }
     if (current.showResult) return;
@@ -379,6 +539,10 @@ class QuizNotifier extends Notifier<QuizState> {
       nextCursor = 0;
     }
 
+    final resetBomb = _config.mode == StudyMode.bomb &&
+        (current.feedback?.outcome == AnswerOutcome.correct ||
+            _bombTimer == null);
+
     state = current.copyWith(
       order: order,
       cursor: nextCursor,
@@ -387,11 +551,18 @@ class QuizNotifier extends Notifier<QuizState> {
       outOfLives: false,
       showOutOfLivesPanel: false,
     );
+
+    if (resetBomb) {
+      _startBombFuse();
+    }
   }
 
   void _finishSession() {
     _challengeTimer?.cancel();
     _advanceTimer?.cancel();
+    _bombTimer?.cancel();
+    _bombTimer = null;
+    unawaited(QuizSounds.stopTimerCue());
     final current = state;
     final best = ref.read(bestStreakProvider);
     final result = QuizSessionResult(
@@ -409,17 +580,23 @@ class QuizNotifier extends Notifier<QuizState> {
       showResult: true,
       result: result,
       clearFeedback: true,
+      clearBombDeadline: true,
     );
   }
 
   void acknowledgeOutOfLives() {
     _advanceTimer?.cancel();
     _challengeTimer?.cancel();
+    _bombTimer?.cancel();
+    _bombTimer = null;
+    unawaited(QuizSounds.stopAll());
     state = state.copyWith(
       outOfLives: false,
       showOutOfLivesPanel: false,
       clearFeedback: true,
       status: QuizStatus.idle,
+      clearBombDeadline: true,
+      bombExploding: false,
     );
   }
 
@@ -427,11 +604,14 @@ class QuizNotifier extends Notifier<QuizState> {
   void resumeAfterLifeGained() {
     _advanceTimer?.cancel();
     _challengeTimer?.cancel();
+    _bombTimer?.cancel();
+    _bombTimer = null;
     if (!state.showOutOfLivesPanel && !state.outOfLives) return;
     state = state.copyWith(
       outOfLives: false,
       showOutOfLivesPanel: false,
       clearFeedback: true,
+      clearBombDeadline: true,
     );
     _advance();
   }
@@ -439,6 +619,75 @@ class QuizNotifier extends Notifier<QuizState> {
   void acknowledgeResult() {
     _advanceTimer?.cancel();
     _challengeTimer?.cancel();
+    _bombTimer?.cancel();
+    _bombTimer = null;
+    unawaited(QuizSounds.stopAll());
     state = QuizState.initial;
+  }
+
+  /// Stops the challenge countdown while an exit prompt is visible.
+  /// Does not change lives or session scores.
+  void pauseSessionClock() {
+    _challengeTimer?.cancel();
+    _challengeTimer = null;
+    unawaited(QuizSounds.stopTimerCue());
+
+    _bombTimer?.cancel();
+    _bombTimer = null;
+    final deadline = state.bombDeadline;
+    if (deadline != null) {
+      final remaining = deadline.difference(DateTime.now()).inMilliseconds;
+      if (remaining <= 0) {
+        _onBombTimeout();
+        return;
+      }
+      state = state.copyWith(
+        clearBombDeadline: true,
+        bombPausedMs: remaining.clamp(
+          1,
+          AppConstants.bombQuestionDuration.inMilliseconds,
+        ),
+      );
+    }
+  }
+
+  /// Restarts the challenge countdown after the user chooses to stay.
+  void resumeSessionClock() {
+    if (state.showResult || state.showOutOfLivesPanel || state.outOfLives) {
+      return;
+    }
+    if (state.status != QuizStatus.ready) return;
+    if (state.bombExploding) return;
+    _startChallengeClock();
+    if (_config.mode == StudyMode.bomb && state.bombPausedMs > 0) {
+      _startBombFuse(remainingMs: state.bombPausedMs);
+    }
+  }
+
+  /// Leaves the current run without finishing it and without losing a life.
+  /// Per-answer stats/mistakes already recorded stay; in-mode score/cursor do not.
+  void abandonSession() {
+    if (state.showResult) {
+      acknowledgeResult();
+      return;
+    }
+    _advanceTimer?.cancel();
+    _challengeTimer?.cancel();
+    _bombTimer?.cancel();
+    _advanceTimer = null;
+    _challengeTimer = null;
+    _bombTimer = null;
+    unawaited(QuizSounds.stopAll());
+    state = QuizState.initial;
+  }
+
+  /// Records local clock time of a streak-advancing play without changing
+  /// streak math. Used only to schedule the next day's reminder.
+  void _noteStreakActivity() {
+    unawaited(
+      ref
+          .read(notificationCoordinatorProvider)
+          .recordStreakActivity(DateTime.now()),
+    );
   }
 }

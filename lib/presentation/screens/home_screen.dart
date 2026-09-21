@@ -40,8 +40,8 @@ class HomeScreen extends ConsumerWidget {
     switch (mode) {
       case StudyMode.classic:
         await openStudySession(context, ref, QuizSessionConfig.classic());
-      case StudyMode.infinite:
-        await openStudySession(context, ref, QuizSessionConfig.infinite());
+      case StudyMode.bomb:
+        await openStudySession(context, ref, QuizSessionConfig.bomb());
       case StudyMode.mistakes:
         await openStudySession(context, ref, QuizSessionConfig.mistakes());
       case StudyMode.streak:
@@ -129,8 +129,8 @@ class HomeScreen extends ConsumerWidget {
                               _openMode(context, ref, StudyMode.mistakes),
                           onStreak: () =>
                               _openMode(context, ref, StudyMode.streak),
-                          onInfinite: () =>
-                              _openMode(context, ref, StudyMode.infinite),
+                          onBomb: () =>
+                              _openMode(context, ref, StudyMode.bomb),
                         ),
                       ),
                       const SizedBox(height: 28),
@@ -557,13 +557,13 @@ class _ModeCircleGrid extends StatelessWidget {
     required this.onChallenge,
     required this.onMistakes,
     required this.onStreak,
-    required this.onInfinite,
+    required this.onBomb,
   });
 
   final VoidCallback onChallenge;
   final VoidCallback onMistakes;
   final VoidCallback onStreak;
-  final VoidCallback onInfinite;
+  final VoidCallback onBomb;
 
   @override
   Widget build(BuildContext context) {
@@ -621,12 +621,12 @@ class _ModeCircleGrid extends StatelessWidget {
                 SizedBox(width: gap),
                 cell(
                   _ModeCircleData(
-                    title: 'Sonsuz Mod',
-                    subtitle: 'Durmadan kelime avı',
-                    color: AppColors.modeInfinite,
-                    icon: AppIcons.infiniteMode,
-                    watermark: AppIcons.infiniteMode,
-                    onTap: onInfinite,
+                    title: 'Bomba Modu',
+                    subtitle: 'Fitil bitmeden seç',
+                    color: AppColors.modeBomb,
+                    icon: AppIcons.bombMode,
+                    watermark: AppIcons.bombMode,
+                    onTap: onBomb,
                   ),
                 ),
               ],
@@ -681,47 +681,78 @@ class _ModeCircle extends StatelessWidget {
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final d = constraints.maxWidth;
-                // Inner safe zone for circular clip — keeps text inside the curve.
-                final pad = d * 0.2;
+                final titleSize = (d * 0.082).clamp(13.0, 15.5);
+                final subtitleSize = (d * 0.058).clamp(10.0, 11.5);
+                const titleHeightFactor = 1.15;
+                const subtitleHeightFactor = 1.25;
+                // Two reserved subtitle lines so 1-line and 2-line copy share
+                // the same title baseline across all four circles.
+                final titleBoxHeight = titleSize * titleHeightFactor;
+                final subtitleBoxHeight = subtitleSize * subtitleHeightFactor * 2;
 
                 return Stack(
                   children: [
-                  Positioned(
-                    right: d * 0.02,
-                    bottom: d * 0.08,
-                    child: AppIcon(
-                      data.watermark,
-                      size: d * 0.34,
-                      opacity: 0.12,
+                    Positioned(
+                      right: d * 0.02,
+                      bottom: d * 0.08,
+                      child: AppIcon(
+                        data.watermark,
+                        size: d * 0.34,
+                        opacity: 0.12,
+                      ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(pad, pad * 0.95, pad, pad),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AppIcon(
-                          data.icon,
-                          size: d * 0.145,
-                        ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        d * 0.16,
+                        d * 0.18,
+                        d * 0.16,
+                        d * 0.22,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppIcon(
+                            data.icon,
+                            size: d * 0.13,
+                          ),
                           const Spacer(),
-                          Text(
-                            data.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.body(
-                              fontWeight: FontWeight.w800,
-                              fontSize: (d * 0.085).clamp(13, 16),
+                          SizedBox(
+                            height: titleBoxHeight,
+                            width: double.infinity,
+                            child: Text(
+                              data.title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.start,
+                              strutStyle: StrutStyle(
+                                fontSize: titleSize,
+                                height: titleHeightFactor,
+                                forceStrutHeight: true,
+                              ),
+                              style: AppTypography.body(
+                                fontWeight: FontWeight.w800,
+                                fontSize: titleSize,
+                              ),
                             ),
                           ),
-                          SizedBox(height: d * 0.02),
-                          Text(
-                            data.subtitle,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTypography.title(
-                              fontSize: (d * 0.065).clamp(10, 12),
-                            ).copyWith(height: 1.25),
+                          SizedBox(height: d * 0.012),
+                          SizedBox(
+                            height: subtitleBoxHeight,
+                            width: double.infinity,
+                            child: Text(
+                              data.subtitle,
+                              maxLines: 2,
+                              overflow: TextOverflow.clip,
+                              textAlign: TextAlign.start,
+                              strutStyle: StrutStyle(
+                                fontSize: subtitleSize,
+                                height: subtitleHeightFactor,
+                                forceStrutHeight: true,
+                              ),
+                              style: AppTypography.title(
+                                fontSize: subtitleSize,
+                              ),
+                            ),
                           ),
                         ],
                       ),

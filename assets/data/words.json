@@ -2718,5 +2718,75 @@
     "id": 544,
     "correct": "masa üzeri",
     "wrong": "masaüzeri"
+  },
+  {
+    "id": 545,
+    "correct": "birtakım şeyler",
+    "wrong": "bir takım şeyler"
+  },
+  {
+    "id": 546,
+    "correct": "bir takım elbise",
+    "wrong": "birtakım elbise"
+  },
+  {
+    "id": 547,
+    "correct": "kravat",
+    "wrong": "kıravat"
+  },
+  {
+    "id": 548,
+    "correct": "topoğrafya",
+    "wrong": "topografya"
+  },
+  {
+    "id": 549,
+    "correct": "Hristiyan",
+    "wrong": "Hıristiyan"
+  },
+  {
+    "id": 550,
+    "correct": "realizm",
+    "wrong": "realizim"
+  },
+  {
+    "id": 551,
+    "correct": "pragmatik",
+    "wrong": "prağmatik"
+  },
+  {
+    "id": 552,
+    "correct": "hayvansever",
+    "wrong": "hayvan sever"
+  },
+  {
+    "id": 553,
+    "correct": "vatansever",
+    "wrong": "vatan sever"
+  },
+  {
+    "id": 554,
+    "correct": "hava yolu",
+    "wrong": "havayolu"
+  },
+  {
+    "id": 555,
+    "correct": "slayt",
+    "wrong": "sılayt"
+  },
+  {
+    "id": 556,
+    "correct": "modern",
+    "wrong": "moderen"
+  },
+  {
+    "id": 557,
+    "correct": "paragraf",
+    "wrong": "parağraf"
+  },
+  {
+    "id": 558,
+    "correct": "tırabzan",
+    "wrong": "trabzan"
   }
 ]

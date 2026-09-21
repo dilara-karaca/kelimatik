@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
 import '../../domain/models/mistake_entry.dart';
 import '../../domain/models/word_pair.dart';
@@ -9,6 +10,8 @@ import '../navigation/app_navigation.dart';
 import '../navigation/soft_transitions.dart';
 import '../providers/catalog_providers.dart';
 import '../widgets/app_error_view.dart';
+import '../widgets/app_icon.dart';
+import '../widgets/catalog_list_ui.dart';
 import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
 import 'word_detail_screen.dart';
@@ -49,146 +52,146 @@ class MistakesListScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: const EdgeInsets.fromLTRB(8, 8, 20, 8),
+                padding: const EdgeInsets.fromLTRB(8, 10, 20, 8),
                 child: Row(
                   children: [
-                    IconButton(
-                      onPressed: () => AppNavigation.popRoute(context),
-                      icon: const Icon(Icons.arrow_back_rounded),
+                    Tooltip(
+                      message: 'Geri',
+                      child: AnimatedPressable(
+                        onTap: () => AppNavigation.popRoute(context),
+                        child: const Padding(
+                          padding: EdgeInsets.fromLTRB(6, 6, 2, 6),
+                          child: Icon(
+                            Icons.arrow_back_rounded,
+                            size: 26,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
                     ),
-                    Text(
-                      'Yanlışlarım',
-                      style: AppTypography.brand(fontSize: 24),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        'Yanlışlarım',
+                        style: AppTypography.brand(fontSize: 24),
+                      ),
+                    ),
+                    wordsAsync.maybeWhen(
+                      data: (words) {
+                        final n = _orderedRows(mistakes, words).length;
+                        if (n == 0) return const SizedBox.shrink();
+                        return CatalogCountChip(
+                          label: '$n kelime',
+                          color: AppColors.wrong,
+                        );
+                      },
+                      orElse: () => const SizedBox.shrink(),
                     ),
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-                child: Text(
-                  'Yanlış yaptığın kelimeler. Çalışmak için ana sayfadaki Yanlışlarım modunu kullan.',
-                  style: AppTypography.title(fontSize: 13),
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 10),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.modeMistakes,
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        alignment: Alignment.center,
+                        child: const AppIcon(AppIcons.mistakesMode, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Yanlış yaptığın kelimeler burada listelenir. Çalışmak için ana sayfadaki Yanlışlarım modunu kullan.',
+                          style: AppTypography.title(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.dark.withValues(alpha: 0.72),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Expanded(
                 child: wordsAsync.when(
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(color: AppColors.accent),
+                  ),
                   error: (e, _) => AppErrorView.fromError(
-                e,
-                onRetry: () => ref.invalidate(wordsListProvider),
-              ),
+                    e,
+                    onRetry: () => ref.invalidate(wordsListProvider),
+                  ),
                   data: (words) {
                     final rows = _orderedRows(mistakes, words);
                     if (rows.isEmpty) {
-                      return Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 36),
-                          child: Text(
-                            'Henüz yanlışın yok 🎉\n'
-                            'Oyun oynadıkça burada tekrar etmen gereken '
-                            'kelimeleri göreceksin.',
-                            textAlign: TextAlign.center,
-                            style: AppTypography.title(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary
-                                  .withValues(alpha: 0.55),
-                            ),
-                          ),
-                        ),
+                      return const CatalogEmptyState(
+                        icon: AppIcons.mistakesMode,
+                        iconTint: AppColors.wrong,
+                        title: 'Henüz yanlışın yok',
+                        message:
+                            'Oyun oynadıkça burada tekrar etmen gereken kelimeleri göreceksin.',
                       );
                     }
 
                     return ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
                       itemCount: rows.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
                         final row = rows[index];
                         final word = row.word;
                         final entry = row.entry;
                         return SoftListAppear(
                           index: index,
-                          child: Material(
-                            color: AppColors.surfaceElevated,
-                            borderRadius: BorderRadius.circular(14),
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(14),
-                              onTap: () => pushSoft(
-                                context,
-                                WordDetailScreen(wordId: word.id),
-                              ),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 12,
+                          child: CatalogWordTile(
+                            correct: word.correct,
+                            wrong: word.wrong,
+                            accent: CatalogWordAccent.mistake,
+                            onTap: () => pushSoft(
+                              context,
+                              WordDetailScreen(wordId: word.id),
+                            ),
+                            leading: _RankBadge(index: index + 1),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.wrongSoft,
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                  child: Text(
+                                    '${entry.wrongCount}×',
+                                    style: AppTypography.title(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.wrong,
+                                    ),
+                                  ),
                                 ),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(14),
-                                  border:
-                                      Border.all(color: AppColors.divider),
+                                const Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: AppColors.textSecondary,
                                 ),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 36,
-                                      height: 36,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.wrong
-                                            .withValues(alpha: 0.1),
-                                        borderRadius:
-                                            BorderRadius.circular(10),
-                                      ),
-                                      child: Text(
-                                        '${index + 1}',
-                                        style: AppTypography.body(
-                                          fontWeight: FontWeight.w800,
-                                          color: AppColors.wrong,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            word.correct,
-                                            style: AppTypography.body(
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 16,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            'Yanlış: ${word.wrong}',
-                                            style: AppTypography.title(
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Text(
-                                      '${entry.wrongCount}×',
-                                      style: AppTypography.title(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.wrong,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    const Icon(
-                                      Icons.chevron_right_rounded,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              ],
                             ),
                           ),
                         );
@@ -199,6 +202,40 @@ class MistakesListScreen extends ConsumerWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RankBadge extends StatelessWidget {
+  const _RankBadge({required this.index});
+
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 38,
+      height: 38,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.wrong.withValues(alpha: 0.18),
+            AppColors.wrong.withValues(alpha: 0.08),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        '$index',
+        style: AppTypography.body(
+          fontWeight: FontWeight.w800,
+          color: AppColors.wrong,
+          fontSize: 14,
         ),
       ),
     );

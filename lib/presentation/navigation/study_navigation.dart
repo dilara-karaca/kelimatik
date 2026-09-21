@@ -24,7 +24,7 @@ Future<void> openStudySession(
       if (!context.mounted) return;
 
       if (result == OutOfLivesEntryResult.openPremium) {
-        await pushSoft(context, const PremiumScreen());
+        await pushSoftFullscreen(context, const PremiumScreen());
         return;
       }
       if (result != OutOfLivesEntryResult.lifeGained) return;
@@ -37,6 +37,6 @@ Future<void> openStudySession(
   await ref.read(quizProvider.notifier).startSession(config);
   if (!context.mounted) return;
 
-  await pushSoft(context, const QuizScreen());
+  await pushSoftFullscreen(context, const QuizScreen());
   ref.read(livesProvider.notifier).refresh();
 }

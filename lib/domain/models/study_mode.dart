@@ -3,7 +3,7 @@ enum StudyMode {
   challenge,
   mistakes,
   streak,
-  infinite,
+  bomb,
   favorites,
 }
 
@@ -33,8 +33,8 @@ class QuizSessionConfig {
         mode: StudyMode.classic,
       );
 
-  factory QuizSessionConfig.infinite() => const QuizSessionConfig(
-        mode: StudyMode.infinite,
+  factory QuizSessionConfig.bomb() => const QuizSessionConfig(
+        mode: StudyMode.bomb,
       );
 
   factory QuizSessionConfig.mistakes() => const QuizSessionConfig(
@@ -75,8 +75,8 @@ class QuizSessionConfig {
         return 'Yanlışlarım';
       case StudyMode.streak:
         return 'Seri Modu';
-      case StudyMode.infinite:
-        return 'Sonsuz Mod';
+      case StudyMode.bomb:
+        return 'Bomba Modu';
       case StudyMode.favorites:
         return 'Favoriler';
     }

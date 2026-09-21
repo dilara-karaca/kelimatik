@@ -10,8 +10,9 @@ import '../navigation/app_navigation.dart';
 import '../navigation/soft_transitions.dart';
 import '../navigation/study_navigation.dart';
 import '../providers/catalog_providers.dart';
+import '../widgets/app_dialogs.dart';
 import '../widgets/app_error_view.dart';
-import '../widgets/app_icon.dart';
+import '../widgets/catalog_list_ui.dart';
 import '../widgets/favorite_toggle_icon.dart';
 import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
@@ -59,6 +60,18 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
         .toList();
   }
 
+  Future<void> _confirmRemoveFavorite(WordPair word) async {
+    final confirmed = await showAppConfirmDialog(
+      context,
+      title: 'Favorilerden çıkarılsın mı?',
+      message: '«${word.correct}» favorilerinden kaldırılacak.',
+      cancelLabel: 'İptal',
+      confirmLabel: 'Evet',
+    );
+    if (confirmed != true || !mounted) return;
+    await ref.read(favoritesProvider.notifier).toggle(word.id);
+  }
+
   @override
   Widget build(BuildContext context) {
     final favIds = ref.watch(favoritesProvider);
@@ -69,82 +82,75 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
       child: Column(
         children: [
           Padding(
-            padding: EdgeInsets.fromLTRB(widget.embedded ? 12 : 8, 8, 8, 8),
+            padding: EdgeInsets.fromLTRB(widget.embedded ? 20 : 8, 10, 16, 8),
             child: Row(
               children: [
-                if (!widget.embedded)
-                  IconButton(
-                    onPressed: () => AppNavigation.popRoute(context),
-                    icon: const Icon(Icons.arrow_back_rounded),
+                if (!widget.embedded) ...[
+                  CatalogCircleButton(
+                    tooltip: 'Geri',
+                    onTap: () => AppNavigation.popRoute(context),
+                    child: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
+                  const SizedBox(width: 8),
+                ],
                 Expanded(
                   child: _searchOpen
-                      ? TextField(
+                      ? CatalogSearchField(
                           controller: _searchController,
                           autofocus: true,
+                          hintText: 'Favorilerde ara...',
                           onChanged: (v) => setState(() => _query = v),
-                          decoration: InputDecoration(
-                            hintText: 'Favorilerde ara...',
-                            isDense: true,
-                            filled: true,
-                            fillColor: AppColors.surfaceElevated,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide:
-                                  const BorderSide(color: AppColors.divider),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide:
-                                  const BorderSide(color: AppColors.divider),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(
-                                color: AppColors.accent,
-                                width: 1.5,
-                              ),
-                            ),
-                            prefixIcon: const Padding(
-                              padding: EdgeInsets.all(12),
-                              child: AppIcon(AppIcons.search, size: 22),
-                            ),
-                          ),
                         )
-                      : Text(
-                          'Favoriler',
-                          style: AppTypography.brand(fontSize: 24),
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Favoriler',
+                              style: AppTypography.brand(fontSize: 24),
+                            ),
+                            if (favIds.isNotEmpty)
+                              Text(
+                                '${favIds.length} kayıtlı kelime',
+                                style: AppTypography.title(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                          ],
                         ),
                 ),
-                IconButton(
-                  onPressed: _toggleSearch,
+                const SizedBox(width: 8),
+                CatalogCircleButton(
+                  highlighted: _searchOpen,
                   tooltip: _searchOpen ? 'Aramayı kapat' : 'Ara',
-                  icon: _searchOpen
-                      ? const Icon(
-                          Icons.close_rounded,
-                          color: AppColors.textPrimary,
-                        )
-                      : const AppIcon(AppIcons.search, size: 24),
+                  onTap: _toggleSearch,
+                  child: Icon(
+                    _searchOpen ? Icons.close_rounded : Icons.search_rounded,
+                    color: AppColors.textPrimary,
+                    size: 22,
+                  ),
                 ),
-                if (favIds.isNotEmpty && !_searchOpen)
-                  TextButton(
-                    onPressed: () => openStudySession(
+                if (favIds.isNotEmpty && !_searchOpen) ...[
+                  const SizedBox(width: 8),
+                  _StudyButton(
+                    onTap: () => openStudySession(
                       context,
                       ref,
                       QuizSessionConfig.favorites(),
                     ),
-                    child: const Text('Çalış'),
                   ),
+                ],
               ],
             ),
           ),
           Expanded(
             child: wordsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: AppColors.accent),
+              ),
               error: (e, _) => AppErrorView.fromError(
                 e,
                 onRetry: () => ref.invalidate(wordsListProvider),
@@ -154,66 +160,46 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
                   words.where((w) => favIds.contains(w.id)).toList(),
                 );
                 if (favIds.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'Henüz favori yok.\nYıldız ile favorilere ekleyebilirsin.',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.title(),
-                    ),
+                  return const CatalogEmptyState(
+                    icon: AppIcons.favorites,
+                    title: 'Henüz favori yok',
+                    message:
+                        'Kelimelerin yanındaki yıldıza dokunarak\nfavorilerine ekleyebilirsin.',
                   );
                 }
                 if (list.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'Aramayla eşleşen favori yok',
-                      style: AppTypography.title(),
-                    ),
+                  return const CatalogEmptyState(
+                    icon: AppIcons.search,
+                    title: 'Eşleşme yok',
+                    message: 'Aramayla eşleşen bir favori bulunamadı.',
                   );
                 }
                 return ListView.separated(
+                  physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
                   itemCount: list.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, __) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final word = list[index];
                     return SoftListAppear(
                       index: index,
-                      child: AnimatedPressable(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceElevated,
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(color: AppColors.divider),
-                          ),
-                          child: ListTile(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            title: Text(
-                              word.correct,
-                              style: AppTypography.body(
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            subtitle: Text(
-                              word.wrong,
-                              style: AppTypography.title(fontSize: 12),
-                            ),
-                            trailing: IconButton(
-                              icon: const FavoriteToggleIcon(
-                                favorited: true,
-                                size: 24,
-                              ),
-                              onPressed: () => ref
-                                  .read(favoritesProvider.notifier)
-                                  .toggle(word.id),
-                            ),
-                            onTap: () {
-                              pushSoft(
-                                context,
-                                WordDetailScreen(wordId: word.id),
-                              );
-                            },
+                      child: CatalogWordTile(
+                        correct: word.correct,
+                        wrong: word.wrong,
+                        accent: CatalogWordAccent.favorite,
+                        onTap: () {
+                          pushSoft(
+                            context,
+                            WordDetailScreen(wordId: word.id),
+                          );
+                        },
+                        trailing: CatalogCircleButton(
+                          highlighted: true,
+                          tooltip: 'Favorilerden çıkar',
+                          onTap: () => _confirmRemoveFavorite(word),
+                          child: const FavoriteToggleIcon(
+                            favorited: true,
+                            size: 20,
                           ),
                         ),
                       ),
@@ -230,6 +216,50 @@ class _FavoritesScreenState extends ConsumerState<FavoritesScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: widget.embedded ? body : PlayfulBackground(child: body),
+    );
+  }
+}
+
+class _StudyButton extends StatelessWidget {
+  const _StudyButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedPressable(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.secondary, AppColors.primary],
+          ),
+          borderRadius: BorderRadius.circular(999),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.accent.withValues(alpha: 0.28),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
+            const SizedBox(width: 2),
+            Text(
+              'Çalış',
+              style: AppTypography.body(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

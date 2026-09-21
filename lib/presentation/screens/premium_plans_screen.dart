@@ -1,44 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/config/billing_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_typography.dart';
+import '../../data/services/billing/billing_result.dart';
 import '../navigation/app_navigation.dart';
 import '../navigation/soft_transitions.dart';
+import '../providers/billing_provider.dart';
 import '../widgets/kelimatik_wordmark.dart';
 import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
 
 enum PremiumPlan { monthly, yearly }
 
-/// Plan picker before Play Billing is wired.
-class PremiumPlansScreen extends StatefulWidget {
+/// Plan picker. Purchase is handled by [BillingNotifier]; layout stays as designed.
+class PremiumPlansScreen extends ConsumerStatefulWidget {
   const PremiumPlansScreen({super.key});
 
   @override
-  State<PremiumPlansScreen> createState() => _PremiumPlansScreenState();
+  ConsumerState<PremiumPlansScreen> createState() => _PremiumPlansScreenState();
 }
 
-class _PremiumPlansScreenState extends State<PremiumPlansScreen> {
+class _PremiumPlansScreenState extends ConsumerState<PremiumPlansScreen> {
   PremiumPlan _selected = PremiumPlan.yearly;
   bool _subscribing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(billingProvider.notifier).queryProducts();
+    });
+  }
 
   Future<void> _onSubscribe() async {
     if (_subscribing) return;
     setState(() => _subscribing = true);
 
-    // Placeholder until Google Play Billing is integrated.
-    await Future<void>.delayed(const Duration(milliseconds: 700));
-    if (!mounted) return;
+    final billing = ref.read(billingProvider.notifier);
+    final result = _selected == PremiumPlan.yearly
+        ? await billing.subscribeYearly()
+        : await billing.subscribeMonthly();
 
+    if (!mounted) return;
     setState(() => _subscribing = false);
+
+    if (result.status == BillingSubscribeStatus.success) {
+      AppNavigation.popRoute(context);
+      return;
+    }
+
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          _selected == PremiumPlan.yearly
-              ? 'Yıllık plan — ödeme yakında eklenecek.'
-              : 'Aylık plan — ödeme yakında eklenecek.',
-        ),
+        content: Text(result.userMessage),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -46,7 +62,18 @@ class _PremiumPlansScreenState extends State<PremiumPlansScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final catalog = ref.watch(billingProvider);
+    final yearlyPrice = catalog.priceOrFallback(
+      BillingConfig.yearlyProductId,
+      BillingConfig.fallbackYearlyPrice,
+    );
+    final monthlyPrice = catalog.priceOrFallback(
+      BillingConfig.monthlyProductId,
+      BillingConfig.fallbackMonthlyPrice,
+    );
+
     return Scaffold(
+
       backgroundColor: Colors.transparent,
       body: PlayfulBackground(
         child: SafeArea(
@@ -117,7 +144,7 @@ class _PremiumPlansScreenState extends State<PremiumPlansScreen> {
                       delay: AppConstants.entranceStagger * 4,
                       child: _PlanCard(
                         title: 'Yıllık',
-                        price: '399,99 TL',
+                        price: yearlyPrice,
                         period: '/ yıl',
                         badge: '%33 tasarruf',
                         selected: _selected == PremiumPlan.yearly,
@@ -130,7 +157,7 @@ class _PremiumPlansScreenState extends State<PremiumPlansScreen> {
                       delay: AppConstants.entranceStagger * 5,
                       child: _PlanCard(
                         title: 'Aylık',
-                        price: '49,99 TL',
+                        price: monthlyPrice,
                         period: '/ ay',
                         selected: _selected == PremiumPlan.monthly,
                         onTap: () =>

@@ -40,6 +40,11 @@ abstract final class AppConstants {
 
   /// Question / card swap inside quiz.
   static const Duration cardSwap = Duration(milliseconds: 220);
+
+  /// Bomb mode: one fuse per question. Visual burn uses an ease-in curve
+  /// but always completes in this duration.
+  static const Duration bombQuestionDuration = Duration(seconds: 5);
+  static const Duration bombExplosionDuration = Duration(milliseconds: 520);
 }
 
 /// Kelimatik brand + UI color tokens.
@@ -68,7 +73,7 @@ abstract final class AppColors {
   static const Color modeChallenge = Color(0xFFD8F5EB);
   static const Color modeMistakes = Color(0xFFFCE0E6);
   static const Color modeStreak = Color(0xFFFFE8D3);
-  static const Color modeInfinite = Color(0xFFDFEDF5);
+  static const Color modeBomb = Color(0xFFDFEDF5);
 
   // —— Soft utility accents (not brand orange) ——
   static const Color sky = Color(0xFF4CC9F0);

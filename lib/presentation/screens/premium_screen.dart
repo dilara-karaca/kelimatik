@@ -5,6 +5,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
 import '../navigation/app_navigation.dart';
+import '../providers/billing_provider.dart';
 import '../providers/premium_provider.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/kelimatik_wordmark.dart';
@@ -12,7 +13,7 @@ import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
 import 'premium_plans_screen.dart';
 
-/// Premium details / purchase entry (billing not wired yet).
+/// Premium details / purchase entry.
 class PremiumScreen extends ConsumerWidget {
   const PremiumScreen({super.key});
 
@@ -114,17 +115,22 @@ class PremiumScreen extends ConsumerWidget {
                 child: FadeSlideIn(
                   delay: AppConstants.entranceStagger * 5,
                   child: AnimatedPressable(
-                    onTap: () {
+                    onTap: () async {
                       if (isPremium) {
-                        ScaffoldMessenger.of(context).clearSnackBars();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Abonelik yönetimi yakında eklenecek.',
+                        final opened = await ref
+                            .read(billingProvider.notifier)
+                            .openSubscriptionManagement();
+                        if (!opened && context.mounted) {
+                          ScaffoldMessenger.of(context).clearSnackBars();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Abonelik yönetimi açılamadı. Play Store’dan dene.',
+                              ),
+                              behavior: SnackBarBehavior.floating,
                             ),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                          );
+                        }
                         return;
                       }
                       openPremiumPlans(context);

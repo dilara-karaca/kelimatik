@@ -6,11 +6,13 @@ import '../providers/main_tab_provider.dart';
 /// Shared back / leave policies so destinations stay intentional.
 ///
 /// Rules:
-/// - Pushed screens (profil, ayarlar, yanlış listesi, kelime detay, quiz):
-///   arrow back → previous route (origin).
+/// - Shell pages (profil, ayarlar, yanlış listesi, kelime detay): stay above
+///   the bottom bar; arrow back → previous route (origin).
+/// - Quiz / game modes: full-screen (root navigator); arrow back → origin.
 /// - Quiz "Ana sayfaya dön" (can bitti): always land on Ana Sayfa tab.
-/// - Bottom tabs: system/back from Ara/Favoriler/Sıralama → Ana Sayfa tab
-///   (not app exit). From Ana Sayfa → allow system exit.
+/// - Bottom tabs: system/back from a shell page → pop it; from
+///   Ara/Favoriler/Sıralama → Ana Sayfa tab (not app exit). From Ana Sayfa
+///   with no shell page → allow system exit.
 abstract final class AppNavigation {
   static const homeTab = 0;
 

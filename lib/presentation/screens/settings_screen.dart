@@ -71,7 +71,7 @@ class SettingsScreen extends ConsumerWidget {
                             style: AppTypography.title(fontSize: 12),
                           ),
                           value: settings.notificationsEnabled,
-                          activeColor: AppColors.primary,
+                          activeThumbColor: AppColors.primary,
                           onChanged: (v) => ref
                               .read(appSettingsProvider.notifier)
                               .setNotificationsEnabled(v),
@@ -98,7 +98,7 @@ class SettingsScreen extends ConsumerWidget {
                             style: AppTypography.title(fontSize: 12),
                           ),
                           value: settings.hapticsEnabled,
-                          activeColor: AppColors.primary,
+                          activeThumbColor: AppColors.primary,
                           onChanged: (v) => ref
                               .read(appSettingsProvider.notifier)
                               .setHapticsEnabled(v),

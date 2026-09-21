@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../domain/models/study_mode.dart';
+import 'notifications/notification_store.dart';
 
 abstract final class UserCacheKeys {
   static const lastSyncedUserId = 'last_synced_user_id';
@@ -18,5 +19,11 @@ Future<void> clearUserProgressLocalCache(SharedPreferences prefs) async {
     prefs.remove(AppConstants.statsPrefsKey),
     prefs.remove(AppConstants.livesPrefsKey),
     prefs.remove(UserCacheKeys.lastSyncedUserId),
+    prefs.remove(NotificationPrefsKeys.lastStreakActivityAt),
+    prefs.remove(NotificationPrefsKeys.incompleteLeftAt),
+    prefs.remove(NotificationPrefsKeys.incompleteSessionStartedAt),
+    prefs.remove(NotificationPrefsKeys.leftWithPartialLives),
+    prefs.remove(NotificationPrefsKeys.sentLog),
+    prefs.remove(NotificationPrefsKeys.scheduled),
   ]);
 }
