@@ -15,6 +15,7 @@ abstract final class AppIcons {
   static const String mistakesMode = '$_base/yanlislarim.png';
   static const String streakMode = '$_base/seri_mod.png';
   static const String bombMode = '$_base/bomba.png';
+  static const String bombFuse = '$_base/bomba_mod.png';
 
   // Game / indicators
   static const String lifeFull = '$_base/dolu_can.png';
@@ -35,4 +36,5 @@ abstract final class AppIcons {
   static const String notification = '$_base/bildirim.png';
   static const String share = '$_base/paylas.png';
   static const String logo = '$_base/logo.png';
+  static const String premium = '$_base/premium.png';
 }

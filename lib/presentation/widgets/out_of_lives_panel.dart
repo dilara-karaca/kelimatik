@@ -87,7 +87,7 @@ class OutOfLivesPanel extends StatelessWidget {
                 const SizedBox(height: 10),
                 _PanelButton(
                   label: 'Sınırsız can · Premium',
-                  icon: Icons.workspace_premium_rounded,
+                  assetIcon: AppIcons.premium,
                   background: AppColors.wrongSoft,
                   foreground: AppColors.textPrimary,
                   onPressed: onOpenPremium,
@@ -168,14 +168,16 @@ class _RegenStatusChip extends StatelessWidget {
 class _PanelButton extends StatelessWidget {
   const _PanelButton({
     required this.label,
-    required this.icon,
     required this.background,
     required this.foreground,
     required this.onPressed,
+    this.icon,
+    this.assetIcon,
   });
 
   final String label;
-  final IconData icon;
+  final IconData? icon;
+  final String? assetIcon;
   final Color background;
   final Color foreground;
   final VoidCallback? onPressed;
@@ -183,6 +185,9 @@ class _PanelButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = onPressed != null;
+    final leading = assetIcon != null
+        ? AppIcon(assetIcon!, size: 22)
+        : Icon(icon, size: 22);
 
     return SizedBox(
       width: double.infinity,
@@ -191,7 +196,7 @@ class _PanelButton extends StatelessWidget {
         enabled: enabled,
         child: FilledButton.icon(
           onPressed: onPressed,
-          icon: Icon(icon, size: 22),
+          icon: leading,
           label: Text(
             label,
             style: AppTypography.body(

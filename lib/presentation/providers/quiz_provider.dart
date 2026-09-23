@@ -404,7 +404,7 @@ class QuizNotifier extends Notifier<QuizState> {
       );
       unawaited(ref.read(statsProvider.notifier).recordCorrect());
       if (_config.recordMistakes) {
-        await ref.read(mistakesProvider.notifier).recordCorrect(wordId);
+        unawaited(ref.read(mistakesProvider.notifier).recordCorrect(wordId));
       }
       if (_config.mode == StudyMode.streak) {
         unawaited(ref.read(bestStreakProvider.notifier).consider(nextStreak));
@@ -418,15 +418,19 @@ class QuizNotifier extends Notifier<QuizState> {
     var outOfLives = false;
     // Lives drop only on a wrong answer — never because the user left the mode.
     if (_config.consumeLives && !ref.read(premiumProvider)) {
-      final lives = await ref.read(livesProvider.notifier).loseLife();
-      outOfLives = lives.isEmpty;
+      try {
+        final lives = await ref.read(livesProvider.notifier).loseLife();
+        outOfLives = lives.isEmpty;
+      } catch (_) {
+        outOfLives = ref.read(livesProvider).isEmpty;
+      }
     }
 
     final afterLives = state;
     if (afterLives.bombExploding || afterLives.showResult) {
       unawaited(ref.read(statsProvider.notifier).recordWrong());
       if (_config.recordMistakes) {
-        await ref.read(mistakesProvider.notifier).recordWrong(wordId);
+        unawaited(ref.read(mistakesProvider.notifier).recordWrong(wordId));
       }
       return;
     }
@@ -443,8 +447,7 @@ class QuizNotifier extends Notifier<QuizState> {
     );
     unawaited(ref.read(statsProvider.notifier).recordWrong());
     if (_config.recordMistakes) {
-      // Await so Yanlışlarım sees the entry even if the user leaves quickly.
-      await ref.read(mistakesProvider.notifier).recordWrong(wordId);
+      unawaited(ref.read(mistakesProvider.notifier).recordWrong(wordId));
     }
 
     if (state.bombExploding || state.showResult) {

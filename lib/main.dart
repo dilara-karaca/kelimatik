@@ -13,9 +13,13 @@ import 'core/utils/quiz_sounds.dart';
 import 'presentation/providers/ads_provider.dart';
 import 'presentation/providers/billing_provider.dart';
 import 'presentation/providers/dependency_providers.dart';
+import 'presentation/widgets/launch_video_warmup.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Decode the splash video while Supabase / prefs boot — do not await.
+  unawaited(LaunchVideoWarmup.start());
 
   await SupabaseBootstrap.initialize();
 
@@ -67,10 +71,22 @@ class _AdsBootstrapState extends ConsumerState<_AdsBootstrap> {
     // Listen to Play purchaseStream before the first frame.
     ref.read(billingProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(QuizSounds.warmUp());
-      unawaited(_prepareAds());
-      unawaited(_prepareBilling());
+      unawaited(_prepareAfterSplash());
     });
+  }
+
+  Future<void> _prepareAfterSplash() async {
+    try {
+      await LaunchVideoWarmup.decodeIdle.future.timeout(
+        const Duration(seconds: 6),
+      );
+    } on TimeoutException {
+      LaunchVideoWarmup.markDecodeIdle();
+    }
+    if (!mounted) return;
+    unawaited(QuizSounds.warmUp());
+    unawaited(_prepareAds());
+    unawaited(_prepareBilling());
   }
 
   Future<void> _prepareAds() async {

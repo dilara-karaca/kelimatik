@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,8 +52,7 @@ class SyncingMistakesRepository implements MistakesRepository {
   @override
   Future<void> recordWrong(int wordId) {
     return _enqueue(() async {
-      final previous = loadAll();
-      final entries = List<MistakeEntry>.from(previous);
+      final entries = List<MistakeEntry>.from(loadAll());
       final index = entries.indexWhere((e) => e.wordId == wordId);
       final MistakeEntry updated;
       if (index < 0) {
@@ -64,36 +64,31 @@ class SyncingMistakesRepository implements MistakesRepository {
       }
       await _persist(entries);
       if (!_sync.hasSession) return;
-      try {
-        await _sync.upsertMistake(updated);
-      } catch (_) {
-        await _persist(previous);
-        rethrow;
-      }
+      unawaited(_pushMistake(updated));
     });
   }
 
   @override
   Future<void> recordCorrect(int wordId) {
     return _enqueue(() async {
-      final previous = loadAll();
-      final entries = List<MistakeEntry>.from(previous);
+      final entries = List<MistakeEntry>.from(loadAll());
       final index = entries.indexWhere((e) => e.wordId == wordId);
       if (index < 0) return;
       final updated = entries[index].recordCorrect();
       entries[index] = updated;
       await _persist(entries);
       if (!_sync.hasSession) return;
-      try {
-        await _sync.upsertMistake(updated);
-      } catch (_) {
-        await _persist(previous);
-        rethrow;
-      }
+      unawaited(_pushMistake(updated));
     });
   }
 
   Future<void> replaceCache(List<MistakeEntry> entries) => _persist(entries);
+
+  Future<void> _pushMistake(MistakeEntry entry) async {
+    try {
+      await _sync.upsertMistake(entry);
+    } catch (_) {}
+  }
 
   Future<void> _persist(List<MistakeEntry> entries) {
     return _prefs.setString(

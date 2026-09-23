@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 
 import '../../core/config/billing_config.dart';
+import '../../data/services/billing/billing_price_format.dart';
 import '../../data/services/billing/billing_result.dart';
 import '../../data/services/billing/billing_service.dart';
 import 'premium_provider.dart';
@@ -19,8 +20,11 @@ class BillingCatalogState {
   final bool loadingProducts;
   final Map<String, ProductDetails> products;
 
-  String priceOrFallback(String productId, String fallback) =>
-      products[productId]?.price ?? fallback;
+  String priceOrFallback(String productId, String fallback) {
+    final product = products[productId];
+    if (product == null) return fallback;
+    return BillingPriceFormat.fromProduct(product);
+  }
 
   BillingCatalogState copyWith({
     bool? storeAvailable,

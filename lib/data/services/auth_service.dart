@@ -67,7 +67,10 @@ class AuthService {
     }
 
     try {
-      await _googleSignIn.initialize(serverClientId: webClientId);
+      await _googleSignIn.initialize(
+        serverClientId: webClientId,
+        clientId: _optionalAndroidClientId(),
+      );
       _googleReady = true;
     } on GoogleSignInException catch (error) {
       throw AuthFailure(_mapGoogleError(error));
@@ -76,12 +79,27 @@ class AuthService {
     }
   }
 
+  String? _optionalAndroidClientId() {
+    final androidClientId = dotenv.env['GOOGLE_ANDROID_CLIENT_ID']?.trim();
+    if (androidClientId == null ||
+        androidClientId.isEmpty ||
+        !androidClientId.endsWith('.apps.googleusercontent.com')) {
+      return null;
+    }
+    return androidClientId;
+  }
+
   /// Opens native Google account picker and creates a Supabase session.
   Future<AuthResponse> signInWithGoogle() async {
     await _ensureGoogleInitialized();
 
     try {
-      final googleUser = await _googleSignIn.authenticate();
+      // Stale emulator accounts often surface as [16] Account reauth failed.
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {}
+
+      final googleUser = await _googleSignIn.authenticate(scopeHint: _scopes);
 
       final authorization = await googleUser.authorizationClient
               .authorizationForScopes(_scopes) ??

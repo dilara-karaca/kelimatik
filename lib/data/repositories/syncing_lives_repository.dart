@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../domain/models/lives_state.dart';
 import '../../domain/repositories/lives_repository.dart';
 import '../datasources/lives_local_datasource.dart';
@@ -15,15 +17,15 @@ class SyncingLivesRepository implements LivesRepository {
 
   @override
   Future<void> save(LivesState state) async {
-    final previous = _local.load();
     await _local.save(state);
     if (!_sync.hasSession) return;
+    unawaited(_pushCloud(state));
+  }
+
+  Future<void> _pushCloud(LivesState state) async {
     try {
       await _sync.updateProfileProgress(lives: state);
-    } catch (_) {
-      await _local.save(previous);
-      rethrow;
-    }
+    } catch (_) {}
   }
 
   Future<void> replaceCache(LivesState state) => _local.save(state);

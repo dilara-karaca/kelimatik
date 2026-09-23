@@ -21,7 +21,7 @@ void main() {
     );
 
     expect(find.byType(BombFuseBar), findsOneWidget);
-    expect(find.image(const AssetImage(AppIcons.bombMode)), findsOneWidget);
+    expect(find.image(const AssetImage(AppIcons.bombFuse)), findsOneWidget);
   });
 }
 

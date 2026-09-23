@@ -11,24 +11,16 @@ class StatsNotifier extends Notifier<QuizStats> {
   QuizStats build() => ref.read(statsRepositoryProvider).load();
 
   Future<void> recordCorrect() async {
-    final previous = state;
     state = state.recordCorrect();
     try {
       await ref.read(statsRepositoryProvider).save(state);
-    } catch (_) {
-      state = previous;
-      rethrow;
-    }
+    } catch (_) {}
   }
 
   Future<void> recordWrong() async {
-    final previous = state;
     state = state.recordWrong();
     try {
       await ref.read(statsRepositoryProvider).save(state);
-    } catch (_) {
-      state = previous;
-      rethrow;
-    }
+    } catch (_) {}
   }
 }

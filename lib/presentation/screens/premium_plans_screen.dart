@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/config/billing_config.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/services/billing/billing_result.dart';
 import '../navigation/app_navigation.dart';
 import '../navigation/soft_transitions.dart';
 import '../providers/billing_provider.dart';
+import '../widgets/app_icon.dart';
 import '../widgets/kelimatik_wordmark.dart';
 import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
@@ -96,15 +98,8 @@ class _PremiumPlansScreenState extends ConsumerState<PremiumPlansScreen> {
                       child: Column(
                         children: [
                           const KelimatikWordmark(fontSize: 32),
-                          const SizedBox(height: 6),
-                          Text(
-                            'PREMIUM',
-                            style: AppTypography.title(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primary,
-                            ).copyWith(letterSpacing: 3.2),
-                          ),
+                          const SizedBox(height: 12),
+                          const AppIcon(AppIcons.premium, size: 64),
                         ],
                       ),
                     ),

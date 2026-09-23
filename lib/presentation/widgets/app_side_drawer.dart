@@ -10,6 +10,7 @@ import '../navigation/soft_transitions.dart';
 import '../providers/auth_provider.dart';
 import '../providers/main_tab_provider.dart';
 import '../screens/mistakes_list_screen.dart';
+import '../screens/premium_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/settings_screen.dart';
 import 'app_dialogs.dart';
@@ -124,6 +125,12 @@ class AppSideDrawer extends ConsumerWidget {
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                     child: Divider(height: 1),
+                  ),
+                  _DrawerTile(
+                    icon: AppIcons.premium,
+                    label: 'Premium',
+                    onTap: () =>
+                        _openPage(context, ref, const PremiumScreen()),
                   ),
                   _DrawerTile(
                     icon: AppIcons.profile,

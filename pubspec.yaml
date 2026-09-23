@@ -50,6 +50,7 @@ dependencies:
   in_app_purchase_platform_interface: 1.4.0
   url_launcher: ^6.3.2
   vibration: ^3.1.8
+  video_player: ^2.10.0
 
 dev_dependencies:
   flutter_test:
@@ -82,3 +83,4 @@ flutter:
     - assets/sounds/challenge_son10.m4a
     - assets/sounds/5streak.mp3
     - assets/sounds/fail.wav
+    - assets/videos/giris.mp4

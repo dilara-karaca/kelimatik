@@ -209,7 +209,7 @@ class _BombVisual extends StatelessWidget {
             opacity: exploding ? (1.0 - (explosion / 0.28).clamp(0.0, 1.0)) : 1,
             child: Transform.scale(
               scale: exploding ? 1 + explosion * 0.35 : 1,
-              child: const AppIcon(AppIcons.bombMode, size: 48),
+              child: const AppIcon(AppIcons.bombFuse, size: 48),
             ),
           ),
         if (exploding)

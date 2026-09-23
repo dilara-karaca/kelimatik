@@ -457,13 +457,7 @@ class _PremiumEntryCard extends StatelessWidget {
                 color: AppColors.primary.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(
-                isPremium
-                    ? Icons.verified_rounded
-                    : Icons.workspace_premium_rounded,
-                color: AppColors.primary,
-                size: 26,
-              ),
+              child: const AppIcon(AppIcons.premium, size: 26),
             ),
             const SizedBox(width: 12),
             Expanded(

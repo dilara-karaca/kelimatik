@@ -57,11 +57,7 @@ class LocalNotificationClient {
     if (android != null) {
       final granted = await android.requestNotificationsPermission();
       final enabled = await android.areNotificationsEnabled();
-      if (granted == true || enabled == true) {
-        await android.requestExactAlarmsPermission();
-        return enabled ?? granted ?? false;
-      }
-      return false;
+      return enabled ?? granted ?? false;
     }
 
     final ios = _plugin.resolvePlatformSpecificImplementation<
@@ -133,24 +129,13 @@ class LocalNotificationClient {
       }
     }
 
-    final exact = await _canUseExactAlarms();
     for (final item in planned) {
       await _plugin.cancel(item.type.notificationId);
-      await _zonedSchedule(item, exact: exact);
+      await _zonedSchedule(item);
     }
   }
 
-  Future<bool> _canUseExactAlarms() async {
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-    if (android == null) return true;
-    return await android.canScheduleExactNotifications() ?? false;
-  }
-
-  Future<void> _zonedSchedule(
-    PlannedNotification item, {
-    required bool exact,
-  }) async {
+  Future<void> _zonedSchedule(PlannedNotification item) async {
     await _ensureTimeZone();
     final when = tz.TZDateTime(
       tz.local,
@@ -181,32 +166,15 @@ class LocalNotificationClient {
       ),
     );
 
-    final mode = exact
-        ? AndroidScheduleMode.exactAllowWhileIdle
-        : AndroidScheduleMode.inexactAllowWhileIdle;
-
-    try {
-      await _plugin.zonedSchedule(
-        item.type.notificationId,
-        item.title,
-        item.body,
-        when,
-        details,
-        androidScheduleMode: mode,
-        payload: item.type.payload,
-      );
-    } catch (_) {
-      if (!exact) rethrow;
-      await _plugin.zonedSchedule(
-        item.type.notificationId,
-        item.title,
-        item.body,
-        when,
-        details,
-        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-        payload: item.type.payload,
-      );
-    }
+    await _plugin.zonedSchedule(
+      item.type.notificationId,
+      item.title,
+      item.body,
+      when,
+      details,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: item.type.payload,
+    );
   }
 
   Future<void> _ensureTimeZone() async {

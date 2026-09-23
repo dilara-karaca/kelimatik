@@ -44,15 +44,8 @@ class PremiumScreen extends ConsumerWidget {
                       child: Column(
                         children: [
                           const KelimatikWordmark(fontSize: 36),
-                          const SizedBox(height: 6),
-                          Text(
-                            'PREMIUM',
-                            style: AppTypography.title(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primary,
-                            ).copyWith(letterSpacing: 3.2),
-                          ),
+                          const SizedBox(height: 12),
+                          const AppIcon(AppIcons.premium, size: 72),
                         ],
                       ),
                     ),
