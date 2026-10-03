@@ -50,8 +50,16 @@ class BillingNotifier extends Notifier<BillingCatalogState> {
     final service = BillingService(
       onEntitlementChanged: (isPremium, {required bool fromStore}) {
         if (!fromStore) return;
+        if (!isPremium) {
+          unawaited(ref.read(yearlyTrialEndsAtProvider.notifier).clear());
+        }
         unawaited(
           ref.read(premiumProvider.notifier).setPremiumActive(isPremium),
+        );
+      },
+      onYearlyTrialStarted: (endsAt) {
+        unawaited(
+          ref.read(yearlyTrialEndsAtProvider.notifier).setEndsAt(endsAt),
         );
       },
     );

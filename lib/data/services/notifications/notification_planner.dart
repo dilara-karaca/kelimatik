@@ -35,6 +35,7 @@ class NotificationPlannerInput {
     required this.lives,
     required this.leftWithPartialLives,
     required this.sentToday,
+    this.trialEndsAt,
   });
 
   final DateTime now;
@@ -51,6 +52,7 @@ class NotificationPlannerInput {
   final LivesState lives;
   final bool leftWithPartialLives;
   final Set<AppNotificationType> sentToday;
+  final DateTime? trialEndsAt;
 }
 
 /// Pure scheduling rules. Does not change streak or lives math.
@@ -72,11 +74,16 @@ abstract final class NotificationPlanner {
       if (shouldSendLives(input)) _lives(input),
     ].whereType<PlannedNotification>().toList();
 
-    return applyDailyLimit(
-      candidates: candidates,
-      sentToday: input.sentToday,
-      now: input.now,
-    );
+    final planned = <PlannedNotification>[
+      ...applyDailyLimit(
+        candidates: candidates,
+        sentToday: input.sentToday,
+        now: input.now,
+      ),
+    ];
+    final trial = _trialEnding(input);
+    if (trial != null) planned.add(trial);
+    return planned;
   }
 
   static bool hasCompletedStreakToday(DailyStreakState streak, DateTime now) {
@@ -283,6 +290,18 @@ abstract final class NotificationPlanner {
       type: AppNotificationType.incompleteGame,
       fireAt: leftAt.add(incompleteDelay),
       body: AppNotificationCopy.incompleteGame,
+    );
+  }
+
+  static PlannedNotification? _trialEnding(NotificationPlannerInput input) {
+    final endsAt = input.trialEndsAt;
+    if (endsAt == null) return null;
+    final fireAt = endsAt.subtract(const Duration(days: 1));
+    if (!fireAt.isAfter(input.now)) return null;
+    return PlannedNotification(
+      type: AppNotificationType.trialEnding,
+      fireAt: fireAt,
+      body: AppNotificationCopy.trialEnding,
     );
   }
 

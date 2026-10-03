@@ -5,6 +5,7 @@ import '../../core/config/billing_config.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
+import '../../data/services/billing/billing_price_format.dart';
 import '../../data/services/billing/billing_result.dart';
 import '../navigation/app_navigation.dart';
 import '../navigation/soft_transitions.dart';
@@ -65,10 +66,14 @@ class _PremiumPlansScreenState extends ConsumerState<PremiumPlansScreen> {
   @override
   Widget build(BuildContext context) {
     final catalog = ref.watch(billingProvider);
+    final yearlyProduct = catalog.products[BillingConfig.yearlyProductId];
     final yearlyPrice = catalog.priceOrFallback(
       BillingConfig.yearlyProductId,
       BillingConfig.fallbackYearlyPrice,
     );
+    final yearlyTrial = yearlyProduct == null
+        ? null
+        : BillingPriceFormat.freeTrialLabel(yearlyProduct);
     final monthlyPrice = catalog.priceOrFallback(
       BillingConfig.monthlyProductId,
       BillingConfig.fallbackMonthlyPrice,
@@ -142,6 +147,7 @@ class _PremiumPlansScreenState extends ConsumerState<PremiumPlansScreen> {
                         price: yearlyPrice,
                         period: '/ yıl',
                         badge: '%33 tasarruf',
+                        note: yearlyTrial,
                         selected: _selected == PremiumPlan.yearly,
                         onTap: () =>
                             setState(() => _selected = PremiumPlan.yearly),
@@ -239,12 +245,14 @@ class _PlanCard extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.badge,
+    this.note,
   });
 
   final String title;
   final String price;
   final String period;
   final String? badge;
+  final String? note;
   final bool selected;
   final VoidCallback onTap;
 
@@ -334,6 +342,17 @@ class _PlanCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (note != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      note!,
+                      style: AppTypography.body(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

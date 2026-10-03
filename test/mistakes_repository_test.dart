@@ -20,6 +20,14 @@ void main() {
     expect(ids, contains(5));
   });
 
+  test('repeated misses on the same word increment wrongCount', () async {
+    await repo.recordWrong(5);
+    await repo.recordWrong(5);
+    await repo.recordWrong(5);
+    final entry = repo.loadAll().singleWhere((e) => e.wordId == 5);
+    expect(entry.wrongCount, 3);
+  });
+
   test('concurrent wrong answers do not drop entries', () async {
     await Future.wait([
       repo.recordWrong(1),

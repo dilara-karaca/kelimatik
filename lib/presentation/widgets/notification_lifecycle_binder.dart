@@ -8,6 +8,7 @@ import '../providers/auth_provider.dart';
 import '../providers/catalog_providers.dart';
 import '../providers/lives_provider.dart';
 import '../providers/notification_provider.dart';
+import '../providers/premium_provider.dart';
 import '../providers/quiz_provider.dart';
 import '../providers/settings_provider.dart';
 
@@ -80,6 +81,7 @@ class _NotificationLifecycleBinderState
       quizInProgress: quiz.isInProgress,
       quizCompleted: quiz.showResult,
       currentSessionStartedAt: quiz.isInProgress ? quiz.startedAt : null,
+      trialEndsAt: ref.read(yearlyTrialEndsAtProvider),
     );
   }
 
@@ -175,6 +177,9 @@ class _NotificationLifecycleBinderState
       _scheduleSync();
     });
     ref.listen(livesProvider, (previous, next) {
+      _scheduleSync();
+    });
+    ref.listen(yearlyTrialEndsAtProvider, (previous, next) {
       _scheduleSync();
     });
     ref.listen(quizProvider, (previous, next) {

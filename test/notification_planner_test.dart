@@ -35,6 +35,7 @@ void main() {
     LivesState lives = fullLives,
     bool leftWithPartialLives = false,
     Set<AppNotificationType> sentToday = const {},
+    DateTime? trialEndsAt,
   }) {
     return NotificationPlannerInput(
       now: now ?? wednesdayMorning,
@@ -51,6 +52,7 @@ void main() {
       lives: lives,
       leftWithPartialLives: leftWithPartialLives,
       sentToday: sentToday,
+      trialEndsAt: trialEndsAt,
     );
   }
 
@@ -363,6 +365,43 @@ void main() {
       expect(NotificationPlanner.plan(base(osPermissionGranted: false)), isEmpty);
       expect(
         NotificationPlanner.plan(base(inAppNotificationsEnabled: false)),
+        isEmpty,
+      );
+    });
+  });
+
+  group('yearly trial ending', () {
+    test('schedules one day before the trial ends, outside the daily cap', () {
+      final now = DateTime(2026, 8, 19, 10);
+      final endsAt = DateTime(2026, 8, 26, 10);
+      final planned = NotificationPlanner.plan(
+        base(
+          now: now,
+          sentToday: {
+            AppNotificationType.dailyStreak,
+            AppNotificationType.streakDanger,
+          },
+          trialEndsAt: endsAt,
+        ),
+      );
+
+      final trial = planned.where(
+        (item) => item.type == AppNotificationType.trialEnding,
+      );
+      expect(trial, hasLength(1));
+      expect(trial.single.fireAt, DateTime(2026, 8, 25, 10));
+      expect(trial.single.body, AppNotificationCopy.trialEnding);
+    });
+
+    test('does not schedule after the warning time has passed', () {
+      final planned = NotificationPlanner.plan(
+        base(
+          now: DateTime(2026, 8, 25, 11),
+          trialEndsAt: DateTime(2026, 8, 26, 10),
+        ),
+      );
+      expect(
+        planned.where((item) => item.type == AppNotificationType.trialEnding),
         isEmpty,
       );
     });

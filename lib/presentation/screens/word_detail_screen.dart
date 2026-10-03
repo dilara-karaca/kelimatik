@@ -74,7 +74,7 @@ class WordDetailScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      'Yaygın hata: ${word.wrong}',
+                      'Yanlış: ${word.wrong}',
                       style: AppTypography.title(
                         color: AppColors.wrong,
                         fontSize: 14,

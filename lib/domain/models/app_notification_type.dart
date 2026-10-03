@@ -3,7 +3,8 @@ enum AppNotificationType {
   streakDanger(priority: 1, notificationId: 7101),
   dailyStreak(priority: 2, notificationId: 7102),
   incompleteGame(priority: 3, notificationId: 7103),
-  livesRefilled(priority: 4, notificationId: 7104);
+  livesRefilled(priority: 4, notificationId: 7104),
+  trialEnding(priority: 0, notificationId: 7105);
 
   const AppNotificationType({
     required this.priority,
@@ -37,4 +38,7 @@ abstract final class AppNotificationCopy {
 
   static const incompleteGame =
       '⚡ Oyunun yarım kaldı! Kaldığın yerden devam et.';
+
+  static const trialEnding =
+      'Ücretsiz denemen yarın bitiyor. Devam etmek istemezsen aboneliğini iptal edebilirsin.';
 }

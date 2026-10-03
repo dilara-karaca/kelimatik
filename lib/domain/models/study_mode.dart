@@ -178,4 +178,5 @@ abstract final class FeaturePrefsKeys {
 
   /// Local Premium flag until Play Billing is wired.
   static const premiumActive = 'premium_active_v1';
+  static const premiumTrialEndsAt = 'premium_trial_ends_at_v1';
 }

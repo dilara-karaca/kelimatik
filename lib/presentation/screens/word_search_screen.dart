@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
+import '../../core/utils/turkish_sort.dart';
 import '../../domain/models/word_pair.dart';
 import '../navigation/app_navigation.dart';
 import '../navigation/soft_transitions.dart';
@@ -11,6 +12,7 @@ import '../providers/catalog_providers.dart';
 import '../widgets/app_error_view.dart';
 import '../widgets/catalog_list_ui.dart';
 import '../widgets/favorite_toggle_icon.dart';
+import '../widgets/word_report_sheet.dart';
 import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
 import 'word_detail_screen.dart';
@@ -113,6 +115,11 @@ class _WordSearchScreenState extends ConsumerState<WordSearchScreen> {
                           return correct.contains(q) || wrong.contains(q);
                         })
                         .toList();
+                filtered.sort((a, b) {
+                  final bySpelling = compareTurkish(a.correct, b.correct);
+                  if (bySpelling != 0) return bySpelling;
+                  return a.id.compareTo(b.id);
+                });
                 if (filtered.isEmpty) {
                   return CatalogEmptyState(
                     icon: AppIcons.search,
@@ -179,11 +186,26 @@ class _WordTile extends ConsumerWidget {
       wrong: word.wrong,
       accent: CatalogWordAccent.search,
       onTap: () => pushSoft(context, WordDetailScreen(wordId: word.id)),
-      trailing: CatalogCircleButton(
-        highlighted: fav,
-        tooltip: fav ? 'Favorilerden çıkar' : 'Favorilere ekle',
-        onTap: () => ref.read(favoritesProvider.notifier).toggle(word.id),
-        child: FavoriteToggleIcon(favorited: fav, size: 20),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CatalogCircleButton(
+            tooltip: 'Sorun bildir',
+            onTap: () => showWordReportSheet(context, word),
+            child: const Icon(
+              Icons.flag_outlined,
+              size: 20,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(width: 6),
+          CatalogCircleButton(
+            highlighted: fav,
+            tooltip: fav ? 'Favorilerden çıkar' : 'Favorilere ekle',
+            onTap: () => ref.read(favoritesProvider.notifier).toggle(word.id),
+            child: FavoriteToggleIcon(favorited: fav, size: 20),
+          ),
+        ],
       ),
     );
   }

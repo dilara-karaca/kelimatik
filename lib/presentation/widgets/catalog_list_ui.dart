@@ -17,6 +17,7 @@ class CatalogWordTile extends StatelessWidget {
     required this.onTap,
     this.accent = CatalogWordAccent.search,
     this.leading,
+    this.titleTrailing,
     this.trailing,
   });
 
@@ -25,6 +26,9 @@ class CatalogWordTile extends StatelessWidget {
   final VoidCallback onTap;
   final CatalogWordAccent accent;
   final Widget? leading;
+
+  /// Sits on the same line as [correct], after the word.
+  final Widget? titleTrailing;
   final Widget? trailing;
 
   Color get _barColor => switch (accent) {
@@ -86,14 +90,24 @@ class CatalogWordTile extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  correct,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: AppTypography.body(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                  ),
+                                Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        correct,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppTypography.body(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                    if (titleTrailing != null) ...[
+                                      const SizedBox(width: 8),
+                                      titleTrailing!,
+                                    ],
+                                  ],
                                 ),
                                 const SizedBox(height: 7),
                                 _WrongChip(wrong: wrong),
@@ -138,7 +152,7 @@ class _WrongChip extends StatelessWidget {
           TextSpan(
             children: [
               TextSpan(
-                text: 'Yanlış  ',
+                text: 'Yanlış: ',
                 style: AppTypography.title(
                   fontSize: 10,
                   fontWeight: FontWeight.w800,

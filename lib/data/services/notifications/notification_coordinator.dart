@@ -16,6 +16,7 @@ class NotificationSnapshot {
     required this.quizInProgress,
     required this.quizCompleted,
     required this.currentSessionStartedAt,
+    this.trialEndsAt,
   });
 
   final DateTime now;
@@ -27,6 +28,7 @@ class NotificationSnapshot {
   final bool quizInProgress;
   final bool quizCompleted;
   final DateTime? currentSessionStartedAt;
+  final DateTime? trialEndsAt;
 }
 
 class NotificationCoordinator {
@@ -124,6 +126,7 @@ class NotificationCoordinator {
       lives: snapshot.lives,
       leftWithPartialLives: _store.leftWithPartialLives,
       sentToday: _store.sentTypesFor(snapshot.now),
+      trialEndsAt: snapshot.trialEndsAt,
     );
 
     final planned = NotificationPlanner.plan(input);
@@ -144,6 +147,7 @@ extension on NotificationSnapshot {
       quizInProgress: quizInProgress,
       quizCompleted: quizCompleted,
       currentSessionStartedAt: currentSessionStartedAt,
+      trialEndsAt: trialEndsAt,
     );
   }
 }

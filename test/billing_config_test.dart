@@ -4,7 +4,7 @@ import 'package:kelimatik/core/config/billing_config.dart';
 void main() {
   test('Premium product IDs stay centralized', () {
     expect(BillingConfig.monthlyProductId, 'premium_monthly');
-    expect(BillingConfig.yearlyProductId, 'kelimatik_premium_yearly');
+    expect(BillingConfig.yearlyProductId, 'premium_yearly');
     expect(
       BillingConfig.isPremiumProductId(BillingConfig.monthlyProductId),
       isTrue,

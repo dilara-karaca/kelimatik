@@ -12,13 +12,19 @@ abstract final class BillingConfig {
   static const String monthlyProductId = 'premium_monthly';
 
   /// Play Console subscription product ID — yearly Premium.
-  static const String yearlyProductId = 'kelimatik_premium_yearly';
+  static const String yearlyProductId = 'premium_yearly';
 
   /// Monthly base plan ID to create under [monthlyProductId].
   static const String monthlyBasePlanId = 'monthly';
 
   /// Yearly base plan ID to create under [yearlyProductId].
   static const String yearlyBasePlanId = 'yearly';
+
+  /// Free trial on the yearly base plan. Play charges only after this.
+  static const Duration yearlyFreeTrial = Duration(days: 7);
+
+  /// Warn this long before [yearlyFreeTrial] ends.
+  static const Duration trialWarningLead = Duration(days: 1);
 
   /// UI fallback when Play localized prices are not loaded yet.
   static const String fallbackMonthlyPrice = '49,99 TL';

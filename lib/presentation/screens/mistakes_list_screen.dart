@@ -166,32 +166,12 @@ class MistakesListScreen extends ConsumerWidget {
                               WordDetailScreen(wordId: word.id),
                             ),
                             leading: _RankBadge(index: index + 1),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 5,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.wrongSoft,
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  child: Text(
-                                    '${entry.wrongCount}×',
-                                    style: AppTypography.title(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.wrong,
-                                    ),
-                                  ),
-                                ),
-                                const Icon(
-                                  Icons.chevron_right_rounded,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ],
+                            titleTrailing: _WrongCountBadge(
+                              count: entry.wrongCount,
+                            ),
+                            trailing: const Icon(
+                              Icons.chevron_right_rounded,
+                              color: AppColors.textSecondary,
                             ),
                           ),
                         );
@@ -201,6 +181,34 @@ class MistakesListScreen extends ConsumerWidget {
                 ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WrongCountBadge extends StatelessWidget {
+  const _WrongCountBadge({required this.count});
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: '$count kez yanlış',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: AppColors.wrongSoft,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Text(
+          'x$count',
+          style: AppTypography.title(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            color: AppColors.wrong,
           ),
         ),
       ),

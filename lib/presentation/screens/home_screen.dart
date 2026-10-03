@@ -17,6 +17,7 @@ import '../widgets/challenge_presets_sheet.dart';
 import '../widgets/kelimatik_wordmark.dart';
 import '../widgets/motion/motion.dart';
 import '../widgets/playful_background.dart';
+import '../widgets/trial_ending_banner.dart';
 import 'word_detail_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -88,6 +89,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       ),
                       const SizedBox(height: 18),
+                      const TrialEndingBanner(),
                       FadeSlideIn(
                         delay: AppConstants.entranceStagger,
                         child: _HeroCard(

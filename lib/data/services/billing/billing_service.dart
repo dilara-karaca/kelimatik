@@ -10,7 +10,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/billing_config.dart';
 import 'billing_log.dart';
 import 'billing_product_index.dart';
+import 'billing_purchase_outcome.dart';
 import 'billing_result.dart';
+import 'trial_warning.dart';
 
 /// Called when Play confirms (or no longer confirms) a Premium entitlement.
 ///
@@ -25,16 +27,19 @@ class BillingService {
   BillingService({
     InAppPurchase? iap,
     required this.onEntitlementChanged,
+    this.onYearlyTrialStarted,
   }) : _iap = iap ?? InAppPurchase.instance;
 
   final InAppPurchase _iap;
   final PremiumEntitlementCallback onEntitlementChanged;
+  final void Function(DateTime trialEndsAt)? onYearlyTrialStarted;
 
   StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
   Completer<BillingSubscribeResult>? _purchaseCompleter;
   bool _listening = false;
   bool _storeAvailable = false;
   String? _lastOwnedProductId;
+  GooglePlayPurchaseDetails? _activePurchase;
 
   final Map<String, ProductDetails> _products = {};
 
@@ -161,15 +166,19 @@ class BillingService {
 
   /// Restores entitlements from Play. Updates Premium only when the store
   /// actually answered ([fromStore] = true).
-  Future<void> restoreEntitlements() async {
+  ///
+  /// Returns true only when this call confirmed an active subscription.
+  /// A failed query leaves the previous local flag alone.
+  Future<bool> restoreEntitlements() async {
     billingLog('restore', 'start');
     startListening();
 
     if (!await checkStoreAvailable()) {
       billingLog('restore', 'skipped — store unavailable, cache kept');
-      return;
+      return false;
     }
 
+    var confirmedByStore = false;
     try {
       if (_isAndroid) {
         try {
@@ -186,6 +195,7 @@ class BillingService {
               past.pastPurchases,
               fromStore: true,
             );
+            confirmedByStore = true;
           }
         } catch (e, st) {
           billingLog('restore', 'queryPastPurchases failed');
@@ -199,6 +209,7 @@ class BillingService {
       billingLog('restore', 'failed — cache kept');
       debugPrint('Billing: restore failed: $e\n$st');
     }
+    return confirmedByStore && _lastOwnedProductId != null;
   }
 
   Future<BillingSubscribeResult> subscribe(String productId) async {
@@ -240,9 +251,17 @@ class BillingService {
     try {
       final PurchaseParam param;
       if (details is GooglePlayProductDetails) {
+        final current = _activePurchase;
+        final replacing = current != null && current.productID != productId;
         param = GooglePlayPurchaseParam(
           productDetails: details,
           offerToken: details.offerToken,
+          changeSubscriptionParam: replacing
+              ? ChangeSubscriptionParam(
+                  oldPurchaseDetails: current,
+                  replacementMode: ReplacementMode.withTimeProration,
+                )
+              : null,
         );
       } else {
         param = PurchaseParam(productDetails: details);
@@ -252,6 +271,10 @@ class BillingService {
       if (!started) {
         billingLog('purchase error', 'buyNonConsumable returned false');
         _purchaseCompleter = null;
+        final owned = await restoreEntitlements();
+        if (owned) {
+          return const BillingSubscribeResult(BillingSubscribeStatus.success);
+        }
         return const BillingSubscribeResult(
           BillingSubscribeStatus.storeUnavailable,
         );
@@ -263,9 +286,8 @@ class BillingService {
       debugPrint('Billing: buyNonConsumable failed: $e\n$st');
       _purchaseCompleter = null;
       if (_isAlreadyOwnedError(e)) {
-        await restoreEntitlements();
-        if (_lastOwnedProductId != null) {
-          onEntitlementChanged(true, fromStore: true);
+        final owned = await restoreEntitlements();
+        if (owned) {
           return const BillingSubscribeResult(BillingSubscribeStatus.success);
         }
         return const BillingSubscribeResult(BillingSubscribeStatus.error);
@@ -319,96 +341,63 @@ class BillingService {
       isLiveUpdate ? 'purchaseStream' : 'restore',
       '${purchases.length} update(s)',
     );
-    var hasPremium = false;
-    var sawPending = false;
-    var sawCanceled = false;
-    var sawError = false;
-    IAPError? lastError;
+    for (final purchase in purchases) {
+      final label = purchase.productID.isEmpty ? '(no product)' : purchase.productID;
+      billingLog(purchase.status.name, label);
+      await _completeIfNeeded(purchase);
+    }
+
+    final outcome = interpretPurchaseUpdates(
+      purchases,
+      isLiveUpdate: isLiveUpdate,
+    );
+    if (outcome.ownedProductId != null) {
+      _rememberOwned(purchases, outcome.ownedProductId!);
+      _captureYearlyTrial(purchases);
+    } else if (outcome.premiumActive == false) {
+      _lastOwnedProductId = null;
+      _activePurchase = null;
+    }
+
+    if (outcome.premiumActive != null && fromStore) {
+      onEntitlementChanged(outcome.premiumActive!, fromStore: true);
+      billingLog(
+        outcome.premiumActive! ? 'Premium activated' : 'Premium deactivated',
+      );
+    }
+    final status = outcome.subscribeStatus;
+    if (status != null) {
+      _completePurchase(BillingSubscribeResult(status));
+    }
+  }
+
+  void _captureYearlyTrial(List<PurchaseDetails> purchases) {
+    final callback = onYearlyTrialStarted;
+    if (callback == null) return;
+    final details = _products[BillingConfig.yearlyProductId];
+    if (details == null) return;
+    final offer = BillingProductIndex.selectedOffer(details);
+    if (offer == null || !BillingProductIndex.hasFreeTrial(offer)) return;
 
     for (final purchase in purchases) {
-      if (!BillingConfig.isPremiumProductId(purchase.productID)) {
-        await _completeIfNeeded(purchase);
-        continue;
-      }
-
-      switch (purchase.status) {
-        case PurchaseStatus.pending:
-          billingLog('purchase pending', purchase.productID);
-          sawPending = true;
-        case PurchaseStatus.purchased:
-          billingLog('purchase success', purchase.productID);
-          hasPremium = true;
-          _lastOwnedProductId = purchase.productID;
-          await _completeIfNeeded(purchase);
-        case PurchaseStatus.restored:
-          billingLog('restore', 'active ${purchase.productID}');
-          hasPremium = true;
-          _lastOwnedProductId = purchase.productID;
-          await _completeIfNeeded(purchase);
-        case PurchaseStatus.canceled:
-          billingLog('purchase canceled', purchase.productID);
-          sawCanceled = true;
-          await _completeIfNeeded(purchase);
-        case PurchaseStatus.error:
-          billingLog(
-            'purchase error',
-            'code=${purchase.error?.code ?? 'unknown'}',
-          );
-          sawError = true;
-          lastError = purchase.error;
-          if (_isAlreadyOwnedIapError(purchase.error)) {
-            hasPremium = true;
-          }
-          await _completeIfNeeded(purchase);
-      }
-    }
-
-    if (hasPremium) {
-      onEntitlementChanged(true, fromStore: fromStore);
-      billingLog('Premium activated');
-      _completePurchase(
-        const BillingSubscribeResult(BillingSubscribeStatus.success),
-      );
+      if (purchase.productID != BillingConfig.yearlyProductId) continue;
+      if (purchase.status != PurchaseStatus.purchased) continue;
+      final millis = int.tryParse(purchase.transactionDate ?? '');
+      final started = millis == null
+          ? DateTime.now()
+          : DateTime.fromMillisecondsSinceEpoch(millis);
+      callback(TrialWarning.endsAtFromStart(started));
       return;
     }
+  }
 
-    if (isLiveUpdate) {
-      if (sawPending) {
-        _completePurchase(
-          const BillingSubscribeResult(BillingSubscribeStatus.pending),
-        );
-        return;
-      }
-      if (sawCanceled) {
-        _completePurchase(
-          const BillingSubscribeResult(BillingSubscribeStatus.canceled),
-        );
-        return;
-      }
-      if (sawError) {
-        if (_isAlreadyOwnedIapError(lastError)) {
-          await restoreEntitlements();
-          _completePurchase(
-            const BillingSubscribeResult(BillingSubscribeStatus.success),
-          );
-          return;
-        }
-        if (lastError != null && _looksLikeNetwork(lastError)) {
-          _completePurchase(
-            const BillingSubscribeResult(BillingSubscribeStatus.networkError),
-          );
-        } else {
-          _completePurchase(
-            const BillingSubscribeResult(BillingSubscribeStatus.error),
-          );
-        }
-      }
+  void _rememberOwned(List<PurchaseDetails> purchases, String productId) {
+    _lastOwnedProductId = productId;
+    for (final purchase in purchases.reversed) {
+      if (purchase is! GooglePlayPurchaseDetails) continue;
+      if (purchase.productID != productId) continue;
+      _activePurchase = purchase;
       return;
-    }
-
-    if (fromStore) {
-      billingLog('Premium deactivated', 'no active Play subscription');
-      onEntitlementChanged(false, fromStore: true);
     }
   }
 
@@ -507,7 +496,7 @@ class BillingService {
     final response = await _iap.queryProductDetails(ids);
     if (response.error != null) {
       billingLog('product query', 'error code=${response.error!.code}');
-      if (_looksLikeNetwork(response.error!)) {
+      if (isNetworkIapError(response.error!)) {
         return const BillingSubscribeResult(
           BillingSubscribeStatus.networkError,
         );
@@ -553,30 +542,12 @@ class BillingService {
       defaultTargetPlatform == TargetPlatform.iOS ||
       defaultTargetPlatform == TargetPlatform.macOS;
 
-  bool _looksLikeNetwork(IAPError error) {
-    final blob = '${error.code} ${error.message}'.toLowerCase();
-    return blob.contains('network') ||
-        blob.contains('service_timeout') ||
-        blob.contains('service_unavailable') ||
-        blob.contains('billing_unavailable') ||
-        blob.contains('timeout');
-  }
-
   bool _looksLikeNetworkException(Object error) {
     final blob = error.toString().toLowerCase();
     return blob.contains('socket') ||
         blob.contains('network') ||
         blob.contains('failed host lookup') ||
         blob.contains('connection');
-  }
-
-  bool _isAlreadyOwnedIapError(IAPError? error) {
-    if (error == null) return false;
-    final blob = '${error.code} ${error.message}'.toLowerCase();
-    return blob.contains('alreadyowned') ||
-        blob.contains('already owned') ||
-        blob.contains('item_already_owned') ||
-        error.code == '7';
   }
 
   bool _isAlreadyOwnedError(Object error) {
