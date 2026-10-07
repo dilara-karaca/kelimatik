@@ -29,6 +29,7 @@ abstract final class AppIcons {
   static const String wrong = '$_base/yanlis.png';
   static const String streakActive = '$_base/streak-devam.png';
   static const String streakLost = '$_base/streak_olu.png';
+  static const String streakChest = '$_base/istiridye.png';
 
   // Utility
   static const String settings = '$_base/ayarlar.png';

@@ -172,6 +172,7 @@ class AuthNotifier extends Notifier<AppAuthState> {
     ref.invalidate(livesProvider);
     ref.invalidate(bestStreakProvider);
     ref.invalidate(dailyStreakProvider);
+    ref.invalidate(dailyStreakGoalProvider);
     ref.invalidate(favoritesProvider);
     ref.invalidate(mistakesProvider);
   }

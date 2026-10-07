@@ -1,16 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/constants/app_icons.dart';
 import '../../core/theme/app_typography.dart';
+import '../../domain/models/daily_streak_goal.dart';
 import '../../domain/models/study_mode.dart';
 import '../navigation/soft_transitions.dart';
 import '../navigation/study_navigation.dart';
 import '../providers/catalog_providers.dart';
 import '../providers/lives_provider.dart';
 import '../providers/main_tab_provider.dart';
-import '../providers/stats_provider.dart';
 import '../widgets/app_icon.dart';
 import '../widgets/app_side_drawer.dart';
 import '../widgets/challenge_presets_sheet.dart';
@@ -58,103 +60,152 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final lives = ref.watch(livesProvider);
     final dailyStreak = ref.watch(dailyStreakProvider);
+    final dailyGoal = ref.watch(dailyStreakGoalProvider);
     final wordOfDay = ref.watch(wordOfTheDayProvider);
-    final stats = ref.watch(statsProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      drawer: const AppSideDrawer(),
-      body: Builder(
-        builder: (scaffoldContext) {
-          final body = SafeArea(
-            bottom: !embedded,
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      FadeSlideIn(
-                        delay: Duration.zero,
-                        child: _HomeHeader(
-                          lives: lives.current,
-                          streak: dailyStreak.current,
-                          streakAlive: dailyStreak.isAlive,
-                          regenLabel: lives.isFull
-                              ? null
-                              : lives.nextLifeCountdownLabel,
-                          onMenuTap: () =>
-                              Scaffold.of(scaffoldContext).openDrawer(),
+    return _HomeStreakGoalSync(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        drawer: const AppSideDrawer(),
+        body: Builder(
+          builder: (scaffoldContext) {
+            final body = SafeArea(
+              bottom: !embedded,
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(),
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        FadeSlideIn(
+                          delay: Duration.zero,
+                          child: _HomeHeader(
+                            lives: lives.current,
+                            streak: dailyStreak.current,
+                            streakAlive: dailyStreak.isAlive,
+                            regenLabel:
+                                lives.isFull
+                                    ? null
+                                    : lives.nextLifeCountdownLabel,
+                            onMenuTap:
+                                () => Scaffold.of(scaffoldContext).openDrawer(),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 18),
-                      const TrialEndingBanner(),
-                      FadeSlideIn(
-                        delay: AppConstants.entranceStagger,
-                        child: _HeroCard(
-                          wordCorrect: wordOfDay?.correct ?? '…',
-                          wordHint: wordOfDay?.usageExample ?? '',
-                          onSearch: () => _goTab(ref, 1),
-                          onDetail: wordOfDay == null
-                              ? null
-                              : () => _open(
-                                    context,
-                                    WordDetailScreen(wordId: wordOfDay.id),
-                                  ),
-                          onFavorites: () => _goTab(ref, 2),
+                        const SizedBox(height: 18),
+                        const TrialEndingBanner(),
+                        FadeSlideIn(
+                          delay: AppConstants.entranceStagger,
+                          child: _HeroCard(
+                            wordCorrect: wordOfDay?.correct ?? '…',
+                            wordHint: wordOfDay?.usageExample ?? '',
+                            onSearch: () => _goTab(ref, 1),
+                            onDetail:
+                                wordOfDay == null
+                                    ? null
+                                    : () => _open(
+                                      context,
+                                      WordDetailScreen(wordId: wordOfDay.id),
+                                    ),
+                            onFavorites: () => _goTab(ref, 2),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 28),
-                      FadeSlideIn(
-                        delay: AppConstants.entranceStagger * 2,
-                        child: Text(
-                          'Öğrenme Modları',
-                          style: AppTypography.brand(fontSize: 20),
+                        const SizedBox(height: 28),
+                        FadeSlideIn(
+                          delay: AppConstants.entranceStagger * 2,
+                          child: Text(
+                            'Öğrenme Modları',
+                            style: AppTypography.brand(fontSize: 20),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 14),
-                      FadeSlideIn(
-                        delay: AppConstants.entranceStagger * 3,
-                        child: _ClassicModeCard(
-                          onTap: () =>
-                              _openMode(context, ref, StudyMode.classic),
+                        const SizedBox(height: 14),
+                        FadeSlideIn(
+                          delay: AppConstants.entranceStagger * 3,
+                          child: _ClassicModeCard(
+                            onTap:
+                                () =>
+                                    _openMode(context, ref, StudyMode.classic),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 18),
-                      FadeSlideIn(
-                        delay: AppConstants.entranceStagger * 4,
-                        child: _ModeCircleGrid(
-                          onChallenge: () =>
-                              _openMode(context, ref, StudyMode.challenge),
-                          onMistakes: () =>
-                              _openMode(context, ref, StudyMode.mistakes),
-                          onStreak: () =>
-                              _openMode(context, ref, StudyMode.streak),
-                          onBomb: () =>
-                              _openMode(context, ref, StudyMode.bomb),
+                        const SizedBox(height: 18),
+                        FadeSlideIn(
+                          delay: AppConstants.entranceStagger * 4,
+                          child: _ModeCircleGrid(
+                            onChallenge:
+                                () => _openMode(
+                                  context,
+                                  ref,
+                                  StudyMode.challenge,
+                                ),
+                            onMistakes:
+                                () =>
+                                    _openMode(context, ref, StudyMode.mistakes),
+                            onStreak:
+                                () => _openMode(context, ref, StudyMode.streak),
+                            onBomb:
+                                () => _openMode(context, ref, StudyMode.bomb),
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 28),
-                      FadeSlideIn(
-                        delay: AppConstants.entranceStagger * 5,
-                        child: _PerformanceSummary(
-                          totalCorrect: stats.totalCorrect,
-                          successRate: stats.successRate,
+                        const SizedBox(height: 28),
+                        FadeSlideIn(
+                          delay: AppConstants.entranceStagger * 5,
+                          child: _DailyStreakGoalCard(
+                            streak: dailyStreak.current,
+                            streakAlive: dailyStreak.isAlive,
+                            answeredToday: dailyGoal.answered,
+                          ),
                         ),
-                      ),
-                    ]),
+                      ]),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
+                ],
+              ),
+            );
 
-          return embedded ? body : PlayfulBackground(child: body);
-        },
+            return embedded ? body : PlayfulBackground(child: body);
+          },
+        ),
       ),
     );
   }
+}
+
+/// Keeps the completed-goal check-in across rebuilds.
+///
+/// Riverpod 3 removed `fireImmediately` from [WidgetRef.listen]. Subscribing
+/// once in [State.initState] still applies the current goal immediately and
+/// keeps listening for later updates, without repeating on every rebuild.
+@visibleForTesting
+Widget debugHomeStreakGoalSync({required Widget child}) {
+  return _HomeStreakGoalSync(child: child);
+}
+
+class _HomeStreakGoalSync extends ConsumerStatefulWidget {
+  const _HomeStreakGoalSync({required this.child});
+
+  final Widget child;
+
+  @override
+  ConsumerState<_HomeStreakGoalSync> createState() =>
+      _HomeStreakGoalSyncState();
+}
+
+class _HomeStreakGoalSyncState extends ConsumerState<_HomeStreakGoalSync> {
+  @override
+  void initState() {
+    super.initState();
+    ref.listenManual<DailyStreakGoal>(dailyStreakGoalProvider, (
+      previous,
+      next,
+    ) {
+      if (next.isComplete) {
+        unawaited(ref.read(dailyStreakProvider.notifier).syncCompletedGoal());
+      }
+    }, fireImmediately: true);
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Soft circular-friendly shadows (negative spread avoids hard square edges).
@@ -268,9 +319,10 @@ class _HomeHeader extends StatelessWidget {
                       color: AppColors.divider,
                     ),
                     _StatChip(
-                      icon: streakAlive && streak > 0
-                          ? AppIcons.streakActive
-                          : AppIcons.streakLost,
+                      icon:
+                          streakAlive && streak > 0
+                              ? AppIcons.streakActive
+                              : AppIcons.streakLost,
                       value: '$streak',
                     ),
                   ],
@@ -285,10 +337,7 @@ class _HomeHeader extends StatelessWidget {
 }
 
 class _StatChip extends StatelessWidget {
-  const _StatChip({
-    required this.icon,
-    required this.value,
-  });
+  const _StatChip({required this.icon, required this.value});
 
   final String icon;
   final String value;
@@ -460,9 +509,7 @@ class _HeroIcon extends StatelessWidget {
       child: SizedBox(
         width: 40,
         height: 40,
-        child: Center(
-          child: AppIcon(icon, size: 22),
-        ),
+        child: Center(child: AppIcon(icon, size: 22)),
       ),
     );
   }
@@ -498,24 +545,24 @@ class _ClassicModeCard extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                Positioned(
-                  right: 20,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: AppIcon(
-                      AppIcons.classicMode,
-                      size: 64,
-                      opacity: 0.14,
+                  Positioned(
+                    right: 20,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: AppIcon(
+                        AppIcons.classicMode,
+                        size: 64,
+                        opacity: 0.14,
+                      ),
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    children: [
-                      const AppIcon(AppIcons.classicMode, size: 28),
-                      const SizedBox(width: 14),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
+                      children: [
+                        const AppIcon(AppIcons.classicMode, size: 28),
+                        const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -574,11 +621,8 @@ class _ModeCircleGrid extends StatelessWidget {
         final gap = 16.0;
         final size = (constraints.maxWidth - gap) / 2;
 
-        Widget cell(_ModeCircleData data) => SizedBox(
-              width: size,
-              height: size,
-              child: _ModeCircle(data: data),
-            );
+        Widget cell(_ModeCircleData data) =>
+            SizedBox(width: size, height: size, child: _ModeCircle(data: data));
 
         return Column(
           children: [
@@ -690,7 +734,8 @@ class _ModeCircle extends StatelessWidget {
                 // Two reserved subtitle lines so 1-line and 2-line copy share
                 // the same title baseline across all four circles.
                 final titleBoxHeight = titleSize * titleHeightFactor;
-                final subtitleBoxHeight = subtitleSize * subtitleHeightFactor * 2;
+                final subtitleBoxHeight =
+                    subtitleSize * subtitleHeightFactor * 2;
 
                 return Stack(
                   children: [
@@ -713,10 +758,7 @@ class _ModeCircle extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          AppIcon(
-                            data.icon,
-                            size: d * 0.13,
-                          ),
+                          AppIcon(data.icon, size: d * 0.13),
                           const Spacer(),
                           SizedBox(
                             height: titleBoxHeight,
@@ -770,126 +812,116 @@ class _ModeCircle extends StatelessWidget {
   }
 }
 
-class _PerformanceSummary extends StatelessWidget {
-  const _PerformanceSummary({
-    required this.totalCorrect,
-    required this.successRate,
+class _DailyStreakGoalCard extends StatelessWidget {
+  const _DailyStreakGoalCard({
+    required this.streak,
+    required this.streakAlive,
+    required this.answeredToday,
   });
 
-  final int totalCorrect;
-  final double successRate;
+  final int streak;
+  final bool streakAlive;
+  final int answeredToday;
 
-  String get _formattedCorrect {
-    final raw = totalCorrect.toString();
-    final buffer = StringBuffer();
-    for (var i = 0; i < raw.length; i++) {
-      final fromEnd = raw.length - i;
-      buffer.write(raw[i]);
-      if (fromEnd > 1 && fromEnd % 3 == 1) buffer.write(',');
-    }
-    return buffer.toString();
-  }
+  static const int _goal = AppConstants.dailyStreakGoalWords;
 
   @override
   Widget build(BuildContext context) {
-    final rate = successRate.clamp(0.0, 100.0);
-    final rateLabel = '%${rate.round()}';
+    final done = answeredToday < 0 ? 0 : answeredToday;
+    final progress = (done / _goal).clamp(0.0, 1.0);
+    final complete = done >= _goal;
+    final active = streakAlive && streak > 0;
+    final subtitle =
+        complete
+            ? 'Bugünkü hedefini tamamladın.'
+            : active
+            ? 'Serini korumak için $_goal kelime cevapla!'
+            : 'Serini başlatmak için $_goal kelime cevapla!';
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Performans Özeti', style: AppTypography.brand(fontSize: 20)),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(999),
-            boxShadow: _softShadow(),
-          ),
-          child: Row(
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: _softShadow(),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
               Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(
-                  color: AppColors.wrongSoft,
-                  shape: BoxShape.circle,
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.modeStreak,
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Center(
-                  child: AppIcon(AppIcons.correct, size: 22),
+                child: Center(
+                  child: AppIcon(
+                    active ? AppIcons.streakActive : AppIcons.streakLost,
+                    size: 26,
+                  ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'TOPLAM DOĞRU',
-                      style: AppTypography.title(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
+                      '$streak Günlük Seri',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.brand(fontSize: 18),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _formattedCorrect,
-                      style: AppTypography.brand(fontSize: 26),
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.title(fontSize: 12),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-          decoration: BoxDecoration(
-            color: Colors.white,
+          const SizedBox(height: 16),
+          ClipRRect(
             borderRadius: BorderRadius.circular(999),
-            boxShadow: _softShadow(),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 8,
+              backgroundColor: AppColors.progressTrack,
+              valueColor: const AlwaysStoppedAnimation(AppColors.accent),
+            ),
           ),
-          child: Column(
+          const SizedBox(height: 10),
+          Row(
             children: [
-              Row(
-                children: [
-                  Text(
-                    'BAŞARI ORANI',
-                    style: AppTypography.title(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    rateLabel,
-                    style: AppTypography.title(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ],
+              Text(
+                'Günlük hedef',
+                style: AppTypography.title(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
               ),
-              const SizedBox(height: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(999),
-                child: LinearProgressIndicator(
-                  value: rate / 100,
-                  minHeight: 8,
-                  backgroundColor: AppColors.accent.withValues(alpha: 0.12),
-                  valueColor: const AlwaysStoppedAnimation(AppColors.accent),
+              const Spacer(),
+              Text(
+                '$done / $_goal kelime',
+                style: AppTypography.title(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

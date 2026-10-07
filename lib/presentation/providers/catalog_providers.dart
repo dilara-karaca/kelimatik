@@ -1,9 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/models/daily_streak_goal.dart';
 import '../../domain/models/daily_streak_state.dart';
 import '../../domain/models/mistake_entry.dart';
+import '../../domain/models/streak_reward_cycle.dart';
 import '../../domain/models/word_pair.dart';
 import 'dependency_providers.dart';
+import 'notification_provider.dart';
 
 final wordsListProvider = FutureProvider<List<WordPair>>((ref) {
   return ref.watch(wordRepositoryProvider).getAllWords();
@@ -114,11 +119,72 @@ final dailyStreakProvider =
 );
 
 class DailyStreakNotifier extends Notifier<DailyStreakState> {
+  Future<void> _inFlightPlay = Future<void>.value();
+
   @override
   DailyStreakState build() => ref.read(dailyStreakRepositoryProvider).load();
 
   void reload() {
     state = ref.read(dailyStreakRepositoryProvider).load();
+  }
+
+  /// One-shot event for the celebration screen. Null after it is consumed.
+  Future<StreakRenewalEvent?> takePendingCelebration() {
+    return ref.read(dailyStreakRepositoryProvider).takePendingCelebration();
+  }
+
+  Future<void> waitForInFlightPlay() async {
+    await _inFlightPlay;
+    await ref.read(dailyStreakRepositoryProvider).waitForIdle();
+  }
+
+  /// Counts one quiz answer toward today's goal. Check-in runs at 10 answers.
+  Future<void> recordPlay({DateTime? now}) {
+    final run = _recordPlay(now: now);
+    _inFlightPlay = run.catchError((_) {});
+    return run;
+  }
+
+  Future<void> _recordPlay({DateTime? now}) async {
+    final result =
+        await ref.read(dailyStreakRepositoryProvider).recordPlay(now: now);
+    state = result.streak;
+    ref.invalidate(dailyStreakGoalProvider);
+    if (!result.didCheckIn) return;
+    unawaited(
+      ref
+          .read(notificationCoordinatorProvider)
+          .recordStreakActivity(now ?? DateTime.now()),
+    );
+  }
+
+  /// If the 10-word goal is already done but check-in was skipped, apply it.
+  Future<void> syncCompletedGoal({DateTime? now}) async {
+    final result = await ref
+        .read(dailyStreakRepositoryProvider)
+        .applyCompletedGoalCheckIn(now: now);
+    if (!result.didCheckIn) return;
+    state = result.streak;
+    unawaited(
+      ref
+          .read(notificationCoordinatorProvider)
+          .recordStreakActivity(now ?? DateTime.now()),
+    );
+  }
+}
+
+final dailyStreakGoalProvider =
+    NotifierProvider<DailyStreakGoalNotifier, DailyStreakGoal>(
+  DailyStreakGoalNotifier.new,
+);
+
+class DailyStreakGoalNotifier extends Notifier<DailyStreakGoal> {
+  @override
+  DailyStreakGoal build() =>
+      ref.read(dailyStreakRepositoryProvider).loadGoal();
+
+  void reload() {
+    state = ref.read(dailyStreakRepositoryProvider).loadGoal();
   }
 }
 

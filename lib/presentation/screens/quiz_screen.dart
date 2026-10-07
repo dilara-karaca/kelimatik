@@ -32,6 +32,7 @@ import '../widgets/score_header.dart';
 import '../widgets/session_result_panel.dart';
 import '../widgets/word_card.dart';
 import 'premium_screen.dart';
+import 'streak_renewed_screen.dart';
 
 class QuizScreen extends ConsumerStatefulWidget {
   const QuizScreen({super.key});
@@ -51,6 +52,32 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     AppNavigation.leaveToHome(context, ref);
   }
 
+  Future<void> _maybeShowStreakCelebration() async {
+    await ref.read(dailyStreakProvider.notifier).waitForInFlightPlay();
+    if (!mounted) return;
+    final event =
+        await ref.read(dailyStreakProvider.notifier).takePendingCelebration();
+    if (event == null || !mounted) return;
+    await pushSoftFullscreen(
+      context,
+      StreakRenewedScreen(
+        fromStreak: event.from,
+        toStreak: event.to,
+      ),
+      fullscreenDialog: true,
+    );
+  }
+
+  Future<void> _finishLeave({required bool toHome}) async {
+    await _maybeShowStreakCelebration();
+    if (!mounted) return;
+    if (toHome) {
+      _leaveToHome();
+    } else {
+      _leaveToOrigin();
+    }
+  }
+
   Future<void> _requestExit({required bool toHome}) async {
     if (_exitPromptOpen) return;
     final quiz = ref.read(quizProvider);
@@ -58,13 +85,13 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     if (quiz.showOutOfLivesPanel) {
       notifier.acknowledgeOutOfLives();
-      _leaveToHome();
+      await _finishLeave(toHome: true);
       return;
     }
 
     if (quiz.showResult) {
       notifier.acknowledgeResult();
-      _leaveToOrigin();
+      await _finishLeave(toHome: false);
       return;
     }
 
@@ -72,7 +99,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
     if (quiz.status != QuizStatus.ready) {
       notifier.abandonSession();
-      _leaveToOrigin();
+      await _finishLeave(toHome: false);
       return;
     }
 
@@ -96,11 +123,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       } else {
         ref.read(quizProvider.notifier).abandonSession();
       }
-      if (toHome) {
-        _leaveToHome();
-      } else {
-        _leaveToOrigin();
-      }
+      await _finishLeave(toHome: toHome);
       return;
     }
 
@@ -143,11 +166,11 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                               ref
                                   .read(quizProvider.notifier)
                                   .acknowledgeResult();
-                              if (quiz.result!.mode == StudyMode.streak) {
-                                _leaveToHome();
-                              } else {
-                                _leaveToOrigin();
-                              }
+                              unawaited(
+                                _finishLeave(
+                                  toHome: quiz.result!.mode == StudyMode.streak,
+                                ),
+                              );
                             },
                             onRetry: switch (quiz.result!.mode) {
                               StudyMode.favorites => () {

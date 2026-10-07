@@ -172,6 +172,14 @@ abstract final class FeaturePrefsKeys {
   static const streakBest = 'quiz_streak_best';
   static const dailyStreak = 'quiz_daily_streak';
   static const dailyStreakLastDate = 'quiz_daily_streak_last_date';
+  static const dailyStreakGoalCount = 'quiz_daily_streak_goal_count';
+  static const dailyStreakGoalDate = 'quiz_daily_streak_goal_date';
+  static const dailyStreakQualifiedDate = 'quiz_daily_streak_qualified_date';
+  static const dailyStreakCelebrationFrom = 'quiz_daily_streak_celebration_from';
+  static const dailyStreakCelebrationTo = 'quiz_daily_streak_celebration_to';
+  static const dailyStreakCelebrationDate = 'quiz_daily_streak_celebration_date';
+  static const dailyStreakCelebrationShownDate =
+      'quiz_daily_streak_celebration_shown_date';
   static const displayName = 'display_name';
   static const hapticsEnabled = 'settings_haptics_enabled';
   static const notificationsEnabled = 'settings_notifications_enabled';

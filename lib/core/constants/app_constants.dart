@@ -17,6 +17,9 @@ abstract final class AppConstants {
   /// XP awarded for each correct answer. Wrong answers grant 0 XP.
   static const int xpPerCorrectAnswer = 10;
 
+  /// Answers in a local calendar day required to keep / start the daily streak.
+  static const int dailyStreakGoalWords = 10;
+
   /// Page / route transitions — snappy fade + subtle slide (~200–280ms).
   static const Duration pageTransition = Duration(milliseconds: 260);
   static const Duration pageReverseTransition = Duration(milliseconds: 220);

@@ -14,7 +14,6 @@ import '../../domain/models/word_pair.dart';
 import 'catalog_providers.dart';
 import 'dependency_providers.dart';
 import 'lives_provider.dart';
-import 'notification_provider.dart';
 import 'premium_provider.dart';
 import 'stats_provider.dart';
 
@@ -382,7 +381,7 @@ class QuizNotifier extends Notifier<QuizState> {
     final question = current.question!;
     final isCorrect = question.isCorrectChoice(choseLeft);
     final wordId = question.wordPair.id;
-    _noteStreakActivity();
+    unawaited(ref.read(dailyStreakProvider.notifier).recordPlay());
 
     if (isCorrect) {
       unawaited(QuizHaptics.correct());
@@ -682,15 +681,5 @@ class QuizNotifier extends Notifier<QuizState> {
     _bombTimer = null;
     unawaited(QuizSounds.stopAll());
     state = QuizState.initial;
-  }
-
-  /// Records local clock time of a streak-advancing play without changing
-  /// streak math. Used only to schedule the next day's reminder.
-  void _noteStreakActivity() {
-    unawaited(
-      ref
-          .read(notificationCoordinatorProvider)
-          .recordStreakActivity(DateTime.now()),
-    );
   }
 }

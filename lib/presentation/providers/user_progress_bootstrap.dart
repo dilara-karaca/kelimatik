@@ -13,15 +13,12 @@ import '../../features/profile/profile_model.dart';
 import 'catalog_providers.dart';
 import 'dependency_providers.dart';
 import 'lives_provider.dart';
-import 'notification_provider.dart';
 import 'stats_provider.dart';
 
 /// Hydrates local cache from Supabase before the main shell opens.
 ///
 /// Cloud is source of truth. Local is only migrated up when cloud is empty
 /// and the cache belongs to the same auth user.
-///
-/// Also applies today's daily-streak check-in (idempotent).
 Future<void> hydrateUserProgressFromCloud({
   required Ref ref,
   required Profile profile,
@@ -105,14 +102,8 @@ Future<void> hydrateUserProgressFromCloud({
       await mistakesRepo.replaceCache(snapshot.mistakes);
     }
 
-    // Daily login streak: continue / restart based on last_daily_login_date.
-    await dailyRepo.checkIn(
-      current: profile.dailyStreak,
-      lastLoginDate: profile.lastDailyLoginDate,
-    );
-    await ref
-        .read(notificationCoordinatorProvider)
-        .recordStreakActivity(DateTime.now());
+    // Hydrate streak display only. Check-in happens after today's 10 answers.
+    await dailyRepo.hydrateFromCloud(snapshot.dailyStreak);
 
     await prefs.setString(UserCacheKeys.lastSyncedUserId, uid);
 
@@ -120,6 +111,7 @@ Future<void> hydrateUserProgressFromCloud({
     ref.invalidate(livesProvider);
     ref.invalidate(bestStreakProvider);
     ref.invalidate(dailyStreakProvider);
+    ref.invalidate(dailyStreakGoalProvider);
     ref.invalidate(favoritesProvider);
     ref.invalidate(mistakesProvider);
   } on UserProgressSyncFailure {

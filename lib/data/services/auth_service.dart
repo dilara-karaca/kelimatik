@@ -1,3 +1,8 @@
+import 'dart:convert';
+import 'dart:io' show Platform;
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -9,12 +14,15 @@ import '../../domain/models/auth_failure.dart';
 /// No email/password. Sign-out is implemented for later UI wiring.
 class AuthService {
   AuthService({SupabaseClient? client})
-      : _client = client ?? Supabase.instance.client;
+    : _client = client ?? Supabase.instance.client;
 
   final SupabaseClient _client;
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
 
   bool _googleReady = false;
+
+  /// Raw nonce for iOS. Google receives its SHA-256; Supabase receives this.
+  String? _iosRawNonce;
 
   static const _scopes = ['email', 'profile'];
 
@@ -69,7 +77,8 @@ class AuthService {
     try {
       await _googleSignIn.initialize(
         serverClientId: webClientId,
-        clientId: _optionalAndroidClientId(),
+        clientId: _platformClientId(),
+        nonce: _iosHashedNonce(),
       );
       _googleReady = true;
     } on GoogleSignInException catch (error) {
@@ -79,14 +88,51 @@ class AuthService {
     }
   }
 
+  /// Android keeps the optional Android client. iOS must use its own client
+  /// so the web [serverClientId] is applied together with it.
+  String? _platformClientId() {
+    if (Platform.isIOS) return _requiredIosClientId();
+    return _optionalAndroidClientId();
+  }
+
+  String _requiredIosClientId() {
+    final iosClientId = _optionalClientId('GOOGLE_IOS_CLIENT_ID');
+    if (iosClientId == null) {
+      throw const AuthFailure(
+        'GOOGLE_IOS_CLIENT_ID eksik veya geçersiz. '
+        'Google Cloud iOS OAuth Client ID değerini .env dosyasına yaz.',
+      );
+    }
+    return iosClientId;
+  }
+
   String? _optionalAndroidClientId() {
-    final androidClientId = dotenv.env['GOOGLE_ANDROID_CLIENT_ID']?.trim();
-    if (androidClientId == null ||
-        androidClientId.isEmpty ||
-        !androidClientId.endsWith('.apps.googleusercontent.com')) {
+    return _optionalClientId('GOOGLE_ANDROID_CLIENT_ID');
+  }
+
+  /// iOS AppAuth inserts a nonce into the ID token. Supply the hash to Google
+  /// and keep the raw value for Supabase. Android is left without a nonce.
+  String? _iosHashedNonce() {
+    if (!Platform.isIOS) return null;
+    _iosRawNonce = _createRawNonce();
+    return sha256.convert(utf8.encode(_iosRawNonce!)).toString();
+  }
+
+  String _createRawNonce() {
+    const chars =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(32, (_) => chars[random.nextInt(chars.length)]).join();
+  }
+
+  String? _optionalClientId(String key) {
+    final clientId = dotenv.env[key]?.trim();
+    if (clientId == null ||
+        clientId.isEmpty ||
+        !clientId.endsWith('.apps.googleusercontent.com')) {
       return null;
     }
-    return androidClientId;
+    return clientId;
   }
 
   /// Opens native Google account picker and creates a Supabase session.
@@ -101,8 +147,10 @@ class AuthService {
 
       final googleUser = await _googleSignIn.authenticate(scopeHint: _scopes);
 
-      final authorization = await googleUser.authorizationClient
-              .authorizationForScopes(_scopes) ??
+      final authorization =
+          await googleUser.authorizationClient.authorizationForScopes(
+            _scopes,
+          ) ??
           await googleUser.authorizationClient.authorizeScopes(_scopes);
 
       final idToken = googleUser.authentication.idToken;
@@ -116,6 +164,7 @@ class AuthService {
         provider: OAuthProvider.google,
         idToken: idToken,
         accessToken: authorization.accessToken,
+        nonce: Platform.isIOS ? _iosRawNonce : null,
       );
 
       if (response.session == null) {
@@ -145,9 +194,7 @@ class AuthService {
     }
 
     try {
-      await _client.auth
-          .signOut()
-          .timeout(const Duration(seconds: 5));
+      await _client.auth.signOut().timeout(const Duration(seconds: 5));
     } on AuthException catch (error) {
       try {
         await _client.auth.signOut(scope: SignOutScope.local);
