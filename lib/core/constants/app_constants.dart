@@ -72,11 +72,11 @@ abstract final class AppColors {
   static const Color surface = white;
   static const Color surfaceElevated = white;
 
-  // —— Study mode pastel cards (do not replace with orange) ——
-  static const Color modeChallenge = Color(0xFFD8F5EB);
-  static const Color modeMistakes = Color(0xFFFCE0E6);
-  static const Color modeStreak = Color(0xFFFFE8D3);
-  static const Color modeBomb = Color(0xFFDFEDF5);
+  /// The four secondary modes. A warm light orange, quieter than [primary].
+  static const Color modeChallenge = Color(0xFFFFC98A);
+  static const Color modeMistakes = modeChallenge;
+  static const Color modeStreak = modeChallenge;
+  static const Color modeBomb = modeChallenge;
 
   // —— Soft utility accents (not brand orange) ——
   static const Color sky = Color(0xFF4CC9F0);
@@ -93,6 +93,7 @@ abstract final class AppColors {
 
   // —— Text ——
   static const Color textPrimary = dark;
+
   /// Secondary copy: dark at reduced opacity feel.
   static const Color textSecondary = Color(0x99292D36);
 

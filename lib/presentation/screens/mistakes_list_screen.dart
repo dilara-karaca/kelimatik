@@ -127,13 +127,17 @@ class MistakesListScreen extends ConsumerWidget {
               ),
               Expanded(
                 child: wordsAsync.when(
-                  loading: () => const Center(
-                    child: CircularProgressIndicator(color: AppColors.accent),
-                  ),
-                  error: (e, _) => AppErrorView.fromError(
-                    e,
-                    onRetry: () => ref.invalidate(wordsListProvider),
-                  ),
+                  loading:
+                      () => const Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accent,
+                        ),
+                      ),
+                  error:
+                      (e, _) => AppErrorView.fromError(
+                        e,
+                        onRetry: () => ref.invalidate(wordsListProvider),
+                      ),
                   data: (words) {
                     final rows = _orderedRows(mistakes, words);
                     if (rows.isEmpty) {
@@ -161,10 +165,11 @@ class MistakesListScreen extends ConsumerWidget {
                             correct: word.correct,
                             wrong: word.wrong,
                             accent: CatalogWordAccent.mistake,
-                            onTap: () => pushSoft(
-                              context,
-                              WordDetailScreen(wordId: word.id),
-                            ),
+                            onTap:
+                                () => pushSoft(
+                                  context,
+                                  WordDetailScreen(wordId: word.id),
+                                ),
                             leading: _RankBadge(index: index + 1),
                             titleTrailing: _WrongCountBadge(
                               count: entry.wrongCount,

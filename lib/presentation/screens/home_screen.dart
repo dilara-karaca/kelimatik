@@ -130,7 +130,7 @@ class HomeScreen extends ConsumerWidget {
                         const SizedBox(height: 18),
                         FadeSlideIn(
                           delay: AppConstants.entranceStagger * 4,
-                          child: _ModeCircleGrid(
+                          child: _ModeBarList(
                             onChallenge:
                                 () => _openMode(
                                   context,
@@ -223,6 +223,27 @@ List<BoxShadow> _softShadow({Color? tint}) {
       blurRadius: 32,
       offset: const Offset(0, 16),
       spreadRadius: -4,
+    ),
+  ];
+}
+
+/// Soft lift under every study mode. Tint follows the mode color.
+List<BoxShadow> _modeShadow(Color tint) {
+  final hsl = HSLColor.fromColor(tint);
+  final deep =
+      hsl.withLightness((hsl.lightness - 0.34).clamp(0.22, 0.48)).toColor();
+  return [
+    BoxShadow(
+      color: deep.withValues(alpha: 0.22),
+      blurRadius: 16,
+      offset: const Offset(0, 8),
+      spreadRadius: -4,
+    ),
+    BoxShadow(
+      color: deep.withValues(alpha: 0.12),
+      blurRadius: 28,
+      offset: const Offset(0, 16),
+      spreadRadius: -8,
     ),
   ];
 }
@@ -522,70 +543,52 @@ class _ClassicModeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedPressable(
-      child: Container(
+    return _ModeSurface(
+      onTap: onTap,
+      gradient: const LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [AppColors.secondary, AppColors.primary],
+      ),
+      child: SizedBox(
         height: 96,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
-          boxShadow: _softShadow(tint: AppColors.accent),
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(999),
-            child: Ink(
-              decoration: const BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(999)),
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [AppColors.secondary, AppColors.primary],
-                ),
+        width: double.infinity,
+        child: Stack(
+          children: [
+            const Positioned(
+              right: 20,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: AppIcon(AppIcons.classicMode, size: 64, opacity: 0.14),
               ),
-              child: Stack(
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
                 children: [
-                  Positioned(
-                    right: 20,
-                    top: 0,
-                    bottom: 0,
-                    child: Center(
-                      child: AppIcon(
-                        AppIcons.classicMode,
-                        size: 64,
-                        opacity: 0.14,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Row(
+                  const AppIcon(AppIcons.classicMode, size: 28),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const AppIcon(AppIcons.classicMode, size: 28),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Klasik Mod',
-                                style: AppTypography.brand(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Temel yazım kuralları ile ilerle.',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: AppTypography.title(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
+                        Text(
+                          'Klasik Mod',
+                          style: AppTypography.brand(
+                            color: Colors.white,
+                            fontSize: 20,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Temel yazım kuralları ile ilerle.',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.title(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -594,6 +597,54 @@ class _ClassicModeCard extends StatelessWidget {
                 ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Soft-edged study mode. Klasik is full width; the four below are narrower.
+class _ModeSurface extends StatelessWidget {
+  const _ModeSurface({
+    required this.onTap,
+    required this.child,
+    this.color,
+    this.gradient,
+  });
+
+  final VoidCallback onTap;
+  final Widget child;
+  final Color? color;
+  final Gradient? gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(999);
+    const shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(999)),
+    );
+    return AnimatedPressable(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: radius,
+          boxShadow: _modeShadow(color ?? AppColors.primary),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          shape: shape,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: onTap,
+            customBorder: shape,
+            child: Ink(
+              decoration: BoxDecoration(
+                color: gradient == null ? color : null,
+                gradient: gradient,
+                borderRadius: radius,
+              ),
+              child: child,
+            ),
           ),
         ),
       ),
@@ -601,8 +652,8 @@ class _ClassicModeCard extends StatelessWidget {
   }
 }
 
-class _ModeCircleGrid extends StatelessWidget {
-  const _ModeCircleGrid({
+class _ModeBarList extends StatelessWidget {
+  const _ModeBarList({
     required this.onChallenge,
     required this.onMistakes,
     required this.onStreak,
@@ -616,76 +667,55 @@ class _ModeCircleGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final gap = 16.0;
-        final size = (constraints.maxWidth - gap) / 2;
+    const gap = 12.0;
+    final bars = [
+      _ModeBarData(
+        title: 'Challenge',
+        subtitle: 'Zamana karşı yarış',
+        color: AppColors.modeChallenge,
+        icon: AppIcons.challengeMode,
+        watermark: AppIcons.challengeMode,
+        onTap: onChallenge,
+      ),
+      _ModeBarData(
+        title: 'Yanlışlarım',
+        subtitle: 'Hatalarından öğren',
+        color: AppColors.modeMistakes,
+        icon: AppIcons.mistakesMode,
+        watermark: AppIcons.mistakesMode,
+        onTap: onMistakes,
+      ),
+      _ModeBarData(
+        title: 'Seri Modu',
+        subtitle: 'Hatasız devam et',
+        color: AppColors.modeStreak,
+        icon: AppIcons.streakMode,
+        watermark: AppIcons.streakMode,
+        onTap: onStreak,
+      ),
+      _ModeBarData(
+        title: 'Bomba Modu',
+        subtitle: 'Fitil bitmeden seç',
+        color: AppColors.modeBomb,
+        icon: AppIcons.bombMode,
+        watermark: AppIcons.bombMode,
+        onTap: onBomb,
+      ),
+    ];
 
-        Widget cell(_ModeCircleData data) =>
-            SizedBox(width: size, height: size, child: _ModeCircle(data: data));
-
-        return Column(
-          children: [
-            Row(
-              children: [
-                cell(
-                  _ModeCircleData(
-                    title: 'Challenge',
-                    subtitle: 'Zamana karşı yarış',
-                    color: AppColors.modeChallenge,
-                    icon: AppIcons.challengeMode,
-                    watermark: AppIcons.challengeMode,
-                    onTap: onChallenge,
-                  ),
-                ),
-                SizedBox(width: gap),
-                cell(
-                  _ModeCircleData(
-                    title: 'Yanlışlarım',
-                    subtitle: 'Hatalarından öğren',
-                    color: AppColors.modeMistakes,
-                    icon: AppIcons.mistakesMode,
-                    watermark: AppIcons.mistakesMode,
-                    onTap: onMistakes,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: gap),
-            Row(
-              children: [
-                cell(
-                  _ModeCircleData(
-                    title: 'Seri Modu',
-                    subtitle: 'Hatasız devam et',
-                    color: AppColors.modeStreak,
-                    icon: AppIcons.streakMode,
-                    watermark: AppIcons.streakMode,
-                    onTap: onStreak,
-                  ),
-                ),
-                SizedBox(width: gap),
-                cell(
-                  _ModeCircleData(
-                    title: 'Bomba Modu',
-                    subtitle: 'Fitil bitmeden seç',
-                    color: AppColors.modeBomb,
-                    icon: AppIcons.bombMode,
-                    watermark: AppIcons.bombMode,
-                    onTap: onBomb,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        );
-      },
+    return Column(
+      children: [
+        for (var i = 0; i < bars.length; i++) ...[
+          if (i > 0) const SizedBox(height: gap),
+          _ModeBar(data: bars[i]),
+        ],
+      ],
     );
   }
 }
 
-class _ModeCircleData {
-  const _ModeCircleData({
+class _ModeBarData {
+  const _ModeBarData({
     required this.title,
     required this.subtitle,
     required this.color,
@@ -702,110 +732,67 @@ class _ModeCircleData {
   final VoidCallback onTap;
 }
 
-class _ModeCircle extends StatelessWidget {
-  const _ModeCircle({required this.data});
+class _ModeBar extends StatelessWidget {
+  const _ModeBar({required this.data});
 
-  final _ModeCircleData data;
+  final _ModeBarData data;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedPressable(
-      child: Container(
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          boxShadow: _softShadow(),
-        ),
-        child: Material(
-          color: data.color,
-          shape: const CircleBorder(),
-          clipBehavior: Clip.antiAlias,
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          child: InkWell(
-            onTap: data.onTap,
-            customBorder: const CircleBorder(),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final d = constraints.maxWidth;
-                final titleSize = (d * 0.082).clamp(13.0, 15.5);
-                final subtitleSize = (d * 0.058).clamp(10.0, 11.5);
-                const titleHeightFactor = 1.15;
-                const subtitleHeightFactor = 1.25;
-                // Two reserved subtitle lines so 1-line and 2-line copy share
-                // the same title baseline across all four circles.
-                final titleBoxHeight = titleSize * titleHeightFactor;
-                final subtitleBoxHeight =
-                    subtitleSize * subtitleHeightFactor * 2;
-
-                return Stack(
-                  children: [
-                    Positioned(
-                      right: d * 0.02,
-                      bottom: d * 0.08,
-                      child: AppIcon(
-                        data.watermark,
-                        size: d * 0.34,
-                        opacity: 0.12,
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        d * 0.16,
-                        d * 0.18,
-                        d * 0.16,
-                        d * 0.22,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          AppIcon(data.icon, size: d * 0.13),
-                          const Spacer(),
-                          SizedBox(
-                            height: titleBoxHeight,
-                            width: double.infinity,
-                            child: Text(
-                              data.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.start,
-                              strutStyle: StrutStyle(
-                                fontSize: titleSize,
-                                height: titleHeightFactor,
-                                forceStrutHeight: true,
-                              ),
-                              style: AppTypography.body(
-                                fontWeight: FontWeight.w800,
-                                fontSize: titleSize,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: d * 0.012),
-                          SizedBox(
-                            height: subtitleBoxHeight,
-                            width: double.infinity,
-                            child: Text(
-                              data.subtitle,
-                              maxLines: 2,
-                              overflow: TextOverflow.clip,
-                              textAlign: TextAlign.start,
-                              strutStyle: StrutStyle(
-                                fontSize: subtitleSize,
-                                height: subtitleHeightFactor,
-                                forceStrutHeight: true,
-                              ),
-                              style: AppTypography.title(
-                                fontSize: subtitleSize,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              },
+    return _ModeSurface(
+      onTap: data.onTap,
+      color: data.color,
+      child: SizedBox(
+        height: 96,
+        width: double.infinity,
+        child: Stack(
+          children: [
+            Positioned(
+              right: 16,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: AppIcon(data.watermark, size: 52, opacity: 0.16),
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  AppIcon(data.icon, size: 26),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          data.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.body(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            color: AppColors.dark,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          data.subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.title(
+                            fontSize: 12,
+                            color: AppColors.dark.withValues(alpha: 0.72),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

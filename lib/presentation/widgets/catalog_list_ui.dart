@@ -32,10 +32,10 @@ class CatalogWordTile extends StatelessWidget {
   final Widget? trailing;
 
   Color get _barColor => switch (accent) {
-        CatalogWordAccent.search => AppColors.correct,
-        CatalogWordAccent.favorite => AppColors.accent,
-        CatalogWordAccent.mistake => AppColors.wrong,
-      };
+    CatalogWordAccent.search => AppColors.correct,
+    CatalogWordAccent.favorite => AppColors.accent,
+    CatalogWordAccent.mistake => AppColors.wrong,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -248,9 +248,10 @@ class _CatalogSearchFieldState extends State<CatalogSearchField> {
         ),
         boxShadow: [
           BoxShadow(
-            color: _focused
-                ? AppColors.accent.withValues(alpha: 0.18)
-                : AppColors.textPrimary.withValues(alpha: 0.05),
+            color:
+                _focused
+                    ? AppColors.accent.withValues(alpha: 0.18)
+                    : AppColors.textPrimary.withValues(alpha: 0.05),
             blurRadius: _focused ? 18 : 12,
             offset: const Offset(0, 6),
             spreadRadius: -4,
@@ -419,9 +420,7 @@ class CatalogCircleButton extends StatelessWidget {
         width: 42,
         height: 42,
         decoration: BoxDecoration(
-          color: highlighted
-              ? AppColors.modeStreak
-              : const Color(0xFFF4F5F7),
+          color: highlighted ? AppColors.modeStreak : const Color(0xFFF4F5F7),
           shape: BoxShape.circle,
         ),
         alignment: Alignment.center,
